@@ -107,15 +107,8 @@ const IngredientVault = ({ onAddIngredient }) => {
 
     return (
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-            <div className="panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '16px', minHeight: 0 }}>
-                <h2 style={{
-                    fontSize: '1rem',
-                    marginBottom: 'var(--spacing-md)',
-                    letterSpacing: '1px',
-                    color: 'var(--text-secondary)'
-                }}>
-                    INGREDIENT_VAULT
-                </h2>
+            <div className="panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '16px', minHeight: 0, overflow: 'hidden' }}>
+                {/* Header removed to save space (Parent Inventory.jsx already has "PANTRY" header) */}
 
                 <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} isSearching={isSearching} />
                 <VaultTabs activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -124,8 +117,8 @@ const IngredientVault = ({ onAddIngredient }) => {
                     flex: 1,
                     minHeight: 0, /* Crucial for nested flex scrolling */
                     overflowY: 'auto',
-                    padding: '10px', // Added padding to prevent shadow clipping
-                    paddingRight: '4px',
+                    padding: '4px',
+                    scrollbarWidth: 'thin'
                 }}>
                     {filteredIngredients.length > 0 ? (
                         filteredIngredients.map((ing) => (
@@ -153,12 +146,7 @@ const IngredientVault = ({ onAddIngredient }) => {
                                     gap: '8px',
                                     fontSize: '0.9rem'
                                 }}>
-                                    <Loader
-                                        size={20}
-                                        style={{
-                                            animation: 'spin 1s linear infinite'
-                                        }}
-                                    />
+                                    <div className="loader-ring" style={{ width: '24px', height: '24px' }}></div>
                                     <span>Searching global database...</span>
                                 </div>
                             )}
@@ -172,14 +160,15 @@ const IngredientVault = ({ onAddIngredient }) => {
                     )}
                 </div>
 
+                {/* Minimalist Footer Stats */}
                 <div style={{
-                    marginTop: 'var(--spacing-md)',
+                    marginTop: '8px',
                     fontSize: '0.7rem',
                     color: 'var(--text-muted)',
-                    textAlign: 'center',
-                    fontFamily: 'var(--font-mono)'
+                    textAlign: 'right',
+                    opacity: 0.7
                 }}>
-                    DB_STATUS: CONNECTED ({filteredIngredients.length} / {allIngredients.length})
+                    {filteredIngredients.length} items available
                 </div>
             </div>
         </div>

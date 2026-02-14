@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Search, Loader, ChefHat } from 'lucide-react';
-import { searchRecipesByTitle, filterValidRecipes } from '../api/recipeDB';
-import RecipeDetailModal from '../components/hud/RecipeDetailModal';
+import { Search, Loader, ChefHat, BookOpen, Utensils } from 'lucide-react';
+import { searchRecipesByTitle, filterValidRecipes, fetchRecipeDetails } from '../api/recipeDB';
+// Local modal removed to use global one from App.jsx
 
-const SearchDish = () => {
+const SearchDish = ({ onImport, onViewRecipe }) => {
     // Changing PAGE_SIZE to 10 to force fresh data fetch and verification
     const PAGE_SIZE = 10;
     const [searchQuery, setSearchQuery] = useState('');
@@ -11,7 +11,9 @@ const SearchDish = () => {
     const [loading, setLoading] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
-    const [selectedRecipeId, setSelectedRecipeId] = useState(null);
+    const [importingId, setImportingId] = useState(null); // ID of recipe being fetched for import
+
+
     const [currentPage, setCurrentPage] = useState(1);
     const [hasMore, setHasMore] = useState(false);
 
@@ -80,6 +82,26 @@ const SearchDish = () => {
     const handleKeyPress = (e) => {
         if (e.key === 'Enter') {
             handleSearch();
+        }
+    };
+
+    const handleMoveToStation = async (recipe) => {
+        if (importingId) return;
+
+        setImportingId(recipe.Recipe_id);
+        try {
+            // Search results only have summary data, we need full details for ingredients
+            const details = await fetchRecipeDetails(recipe.Recipe_id);
+            if (details && details.ingredients) {
+                onImport(details.ingredients, details.title);
+            } else {
+                console.error('[SearchDish] Failed to fetch ingredients for import');
+                // Optional: show a small toast or alert here
+            }
+        } catch (error) {
+            console.error('[SearchDish] Import failed:', error);
+        } finally {
+            setImportingId(null);
         }
     };
 
@@ -203,7 +225,7 @@ const SearchDish = () => {
                                     {recipes.map((recipe, index) => (
                                         <div
                                             key={recipe.Recipe_id}
-                                            onClick={() => setSelectedRecipeId(recipe.Recipe_id)}
+                                            onClick={() => handleMoveToStation(recipe)}
                                             className="card-3d card-hover"
                                             style={{
                                                 cursor: 'pointer',
@@ -222,11 +244,11 @@ const SearchDish = () => {
                                                 transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'
                                             }}
                                             onMouseEnter={(e) => {
-                                                e.currentTarget.style.transform = 'translateY(-5px) scale(1.02)';
+                                                e.currentTarget.style.transform = 'translateY(-5px)';
                                                 e.currentTarget.style.boxShadow = '0 15px 30px rgba(0,0,0,0.15)';
                                             }}
                                             onMouseLeave={(e) => {
-                                                e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                                                e.currentTarget.style.transform = 'translateY(0)';
                                                 e.currentTarget.style.boxShadow = '';
                                             }}
                                         >
@@ -289,7 +311,7 @@ const SearchDish = () => {
                                                         borderRadius: '8px',
                                                         fontWeight: '500'
                                                     }}>
-                                                        🔥 {recipe.categories || recipe.calories || '?'}
+                                                        🔥 {recipe.calories || '?'} kcal
                                                     </span>
                                                     {recipe.ingredientCount > 0 && (
                                                         <span style={{
@@ -305,7 +327,36 @@ const SearchDish = () => {
                                                     )}
                                                 </div>
 
-                                                <ChefHat size={20} color="var(--color-neon-cyan)" style={{ opacity: 0.8 }} />
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleMoveToStation(recipe);
+                                                    }}
+                                                    disabled={importingId === recipe.Recipe_id}
+                                                    style={{
+                                                        background: 'var(--color-neon-cyan)',
+                                                        color: '#fff',
+                                                        border: 'none',
+                                                        borderRadius: '8px',
+                                                        padding: '6px 14px',
+                                                        fontSize: '0.85rem',
+                                                        fontWeight: '800',
+                                                        cursor: 'pointer',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '8px',
+                                                        boxShadow: '0 4px 12px rgba(41, 128, 185, 0.2)',
+                                                        transition: 'all 0.2s'
+                                                    }}
+                                                    className="btn-hover-glow"
+                                                >
+                                                    {importingId === recipe.Recipe_id ? (
+                                                        <Loader size={16} className="animate-spin" />
+                                                    ) : (
+                                                        <Utensils size={16} />
+                                                    )}
+                                                    MOVE TO MIXING TABLE
+                                                </button>
                                             </div>
                                         </div>
                                     ))}
@@ -344,14 +395,6 @@ const SearchDish = () => {
                     )}
                 </div>
             </div>
-
-            {/* Recipe Detail Modal */}
-            {selectedRecipeId && (
-                <RecipeDetailModal
-                    recipeId={selectedRecipeId}
-                    onClose={() => setSelectedRecipeId(null)}
-                />
-            )}
         </div>
     );
 };

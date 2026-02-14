@@ -6,11 +6,34 @@ import SimulationHUD from '../components/hud/SimulationHUD';
 import { Loader } from 'lucide-react';
 import { identifyRecipe, fetchRecipeDetails } from '../api/recipeDB';
 
-const Inventory = ({ onSimulationComplete }) => {
+const Inventory = ({ onSimulationComplete, onViewRecipe }) => {
     const [selectedIngredients, setSelectedIngredients] = useState([]);
     const [simulationStatus, setSimulationStatus] = useState('idle'); // idle, processing, complete
     const [simulationData, setSimulationData] = useState(null);
     const [logs, setLogs] = useState([]);
+
+    // Check for pending imports from history or search
+    React.useEffect(() => {
+        const checkPending = () => {
+            try {
+                const pendingStr = localStorage.getItem('pending_culinary_import');
+                if (pendingStr) {
+                    const pending = JSON.parse(pendingStr);
+                    // Only import if it's fresh (last 30 seconds)
+                    if (Date.now() - pending.timestamp < 30000) {
+                        setSelectedIngredients(pending.ingredients || []);
+                        setSimulationStatus('idle');
+                        addLog(`IMPORTED: ${pending.title || 'Recipe Ingredients'}`);
+                        addLog('VESSEL_READY: PROCEED_TO_COOKING');
+                    }
+                    localStorage.removeItem('pending_culinary_import');
+                }
+            } catch (e) {
+                console.error('Failed to load pending import:', e);
+            }
+        };
+        checkPending();
+    }, []);
 
     const addLog = (message, type = 'info') => {
         const time = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -211,12 +234,16 @@ const Inventory = ({ onSimulationComplete }) => {
             }
             rightColumn={
                 simulationData ? (
-                    <SimulationHUD selectedIngredients={simulationData} onImport={handleImportRecipe} />
+                    <SimulationHUD
+                        selectedIngredients={simulationData}
+                        onImport={handleImportRecipe}
+                        onViewRecipe={onViewRecipe}
+                    />
                 ) : (
                     <div className="glass-panel" style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
                         {simulationStatus === 'processing' ? (
                             <>
-                                <Loader className="spin" size={48} color="var(--color-neon-cyan)" />
+                                <div className="loader-ring"></div>
                                 <div style={{ marginTop: '16px', letterSpacing: '2px', fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>COOKING...</div>
                             </>
                         ) : (

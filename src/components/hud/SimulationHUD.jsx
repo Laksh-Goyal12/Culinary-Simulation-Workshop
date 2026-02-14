@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { X, Check, Flame, List, Play, ChefHat, Clock, Utensils } from 'lucide-react';
 import FlavorRadar from './FlavorRadar';
 import NutrientGauge from './NutrientGauge';
 import InteractionAlert from './InteractionAlert';
@@ -91,96 +92,158 @@ const SimulationHUD = ({ selectedIngredients: data, onImport }) => {
 
     return (
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <div className="card-3d" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)', overflowY: 'auto', minHeight: 0, background: '#fff', padding: '16px' }}>
-                <h2 style={{ fontSize: '1rem', color: 'var(--text-secondary)', letterSpacing: '1px', fontWeight: '800' }}>
+            <div className="card-3d" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0, background: '#fff', padding: '16px' }}>
+                <h2 style={{ fontSize: '1rem', color: 'var(--text-secondary)', letterSpacing: '1px', fontWeight: '800', marginBottom: '16px', flexShrink: 0 }}>
                     SIMULATION DATA
                 </h2>
 
-                {identifiedDish && (
-                    <div style={{
-                        padding: '16px',
-                        background: 'radial-gradient(circle, rgba(57, 255, 20, 0.1) 0%, rgba(255,255,255,0) 100%)',
-                        border: '2px solid var(--color-neon-green)',
-                        borderRadius: '16px',
-                        marginBottom: '8px',
-                        textAlign: 'center',
-                        boxShadow: '0 4px 12px rgba(57, 255, 20, 0.2)'
-                    }}>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--color-neon-green)', marginBottom: '4px', fontWeight: 'bold' }}>
-                            MOLECULAR MATCH IDENTIFIED
-                        </div>
-                        <div style={{ fontSize: '1.4rem', fontWeight: '900', color: 'var(--text-primary)', textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-                            {identifiedDish}
-                        </div>
-                        {confidenceScore !== null && (
-                            <div style={{ fontSize: '0.9rem', color: 'var(--color-neon-green)', marginTop: '4px', fontWeight: 'bold' }}>
-                                Match Confidence: {confidenceScore}%
+                <div style={{ flex: 1, overflowY: 'auto', minHeight: 0, paddingRight: '4px', display: 'flex', flexDirection: 'column', gap: '24px', scrollbarWidth: 'thin' }}>
+                    {identifiedDish && (
+                        <div style={{
+                            padding: '16px',
+                            background: 'radial-gradient(circle, rgba(57, 255, 20, 0.1) 0%, rgba(255,255,255,0) 100%)',
+                            border: '2px solid var(--color-neon-green)',
+                            borderRadius: '16px',
+                            marginBottom: '8px',
+                            textAlign: 'center',
+                            boxShadow: '0 4px 12px rgba(57, 255, 20, 0.2)',
+                            flexShrink: 0
+                        }}>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--color-neon-green)', marginBottom: '4px', fontWeight: 'bold' }}>
+                                MOLECULAR MATCH IDENTIFIED
                             </div>
-                        )}
-                    </div>
-                )}
-
-                {recipeDetails && recipeDetails.normalizedIngredients && (
-                    <div style={{
-                        padding: '16px',
-                        background: '#f8f9fa',
-                        borderRadius: '16px',
-                        marginBottom: '8px',
-                        boxShadow: 'inset 2px 2px 6px rgba(0,0,0,0.05), inset -2px -2px 6px rgba(255,255,255,0.5)' /* Inset Readout - Softened */
-                    }}>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--color-neon-blue)', marginBottom: '12px', textAlign: 'center', fontWeight: 'bold', letterSpacing: '1px' }}>
-                            RECIPE COMPARISON
-                        </div>
-                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                            {recipeDetails.normalizedIngredients.map((recipeIng, idx) => {
-                                const userIng = selectedIngredients.find(u =>
-                                    u.name.toLowerCase() === recipeIng.name.toLowerCase()
-                                );
-
-                                const isMatch = !!userIng;
-                                const qtyMatch = userIng && Math.abs(userIng.quantity - recipeIng.quantity) < (recipeIng.quantity * 0.2);
-
-                                return (
-                                    <div key={idx} style={{
-                                        marginBottom: '8px',
-                                        paddingBottom: '8px',
-                                        borderBottom: idx < recipeDetails.normalizedIngredients.length - 1 ? '1px dashed #e0e0e0' : 'none',
+                            <div style={{ fontSize: '1.4rem', fontWeight: '900', color: 'var(--text-primary)', textShadow: '0 2px 4px rgba(0,0,0,0.1)', marginBottom: '12px' }}>
+                                {identifiedDish}
+                            </div>
+                            {recipeDetails && recipeDetails.ingredients && (
+                                <button
+                                    onClick={() => onImport(recipeDetails.ingredients, identifiedDish)}
+                                    style={{
+                                        background: 'var(--color-neon-cyan)',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        padding: '8px 16px',
+                                        fontSize: '0.9rem',
+                                        fontWeight: '800',
+                                        cursor: 'pointer',
                                         display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center'
-                                    }}>
-                                        <span style={{ color: isMatch ? 'var(--text-primary)' : 'var(--text-muted)', fontWeight: isMatch ? '600' : '400' }}>
-                                            {recipeIng.name}
-                                        </span>
-                                        <span style={{
-                                            color: isMatch ? (qtyMatch ? 'var(--color-neon-green)' : '#e67e22') : '#e74c3c',
-                                            fontSize: '0.8rem',
-                                            fontWeight: 'bold'
-                                        }}>
-                                            {userIng ? `${userIng.quantity}${userIng.unit}` : '—'} → {recipeIng.quantity}{recipeIng.unit} {isMatch ? (qtyMatch ? '✓' : '⚠') : '✗'}
-                                        </span>
-                                    </div>
-                                );
-                            })}
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        boxShadow: '0 4px 12px rgba(41, 128, 185, 0.3)',
+                                        transition: 'all 0.2s'
+                                    }}
+                                    className="btn-hover-glow"
+                                >
+                                    <Utensils size={16} />
+                                    MOVE TO MIXING TABLE
+                                </button>
+                            )}
+                            {confidenceScore !== null && (
+                                <div style={{ fontSize: '0.9rem', color: 'var(--color-neon-green)', marginTop: '8px', fontWeight: 'bold' }}>
+                                    Match Confidence: {confidenceScore}%
+                                </div>
+                            )}
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {selectedIngredients.length === 0 ? (
-                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                        No active simulation data.
-                    </div>
-                ) : (
-                    <>
-                        <FlavorRadar data={flavorData} />
-                        <div style={{ borderTop: '1px solid var(--border-color)', padding: '16px 0', margin: '8px 0' }} />
-                        <NutrientGauge nutrition={nutrition} />
-                        <div style={{ borderTop: '1px solid var(--border-color)', padding: '16px 0', margin: '8px 0' }} />
-                        <RecipeInspiration onImport={onImport} currentIngredients={selectedIngredients} />
-                        <div style={{ borderTop: '1px solid var(--border-color)', padding: '16px 0', margin: '8px 0' }} />
-                        <InteractionAlert activeAlerts={alerts} />
-                    </>
-                )}
+                    {recipeDetails && recipeDetails.normalizedIngredients && (
+                        <div style={{
+                            padding: '16px',
+                            background: '#f8f9fa',
+                            borderRadius: '16px',
+                            marginBottom: '8px',
+                            boxShadow: 'inset 2px 2px 6px rgba(0,0,0,0.05), inset -2px -2px 6px rgba(255,255,255,0.5)',
+                            flexShrink: 0
+                        }}>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--color-neon-blue)', marginBottom: '12px', textAlign: 'center', fontWeight: 'bold', letterSpacing: '1px' }}>
+                                RECIPE COMPARISON
+                            </div>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                                {recipeDetails.normalizedIngredients.map((recipeIng, idx) => {
+                                    const userIng = selectedIngredients.find(u =>
+                                        u.name.toLowerCase() === recipeIng.name.toLowerCase()
+                                    );
+
+                                    const isMatch = !!userIng;
+                                    const qtyMatch = userIng && Math.abs(userIng.quantity - recipeIng.quantity) < (recipeIng.quantity * 0.2);
+
+                                    return (
+                                        <div key={idx} style={{
+                                            marginBottom: '8px',
+                                            paddingBottom: '8px',
+                                            borderBottom: idx < recipeDetails.normalizedIngredients.length - 1 ? '1px dashed #e0e0e0' : 'none',
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center'
+                                        }}>
+                                            <span style={{ color: isMatch ? 'var(--text-primary)' : 'var(--text-muted)', fontWeight: isMatch ? '600' : '400' }}>
+                                                {recipeIng.name}
+                                            </span>
+                                            <span style={{
+                                                color: isMatch ? (qtyMatch ? 'var(--color-neon-green)' : '#e67e22') : '#e74c3c',
+                                                fontSize: '0.8rem',
+                                                fontWeight: 'bold'
+                                            }}>
+                                                {userIng ? `${userIng.quantity}${userIng.unit}` : '—'} → {recipeIng.quantity}{recipeIng.unit} {isMatch ? (qtyMatch ? '✓' : '⚠') : '✗'}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    {selectedIngredients.length === 0 ? (
+                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontStyle: 'italic', flexDirection: 'column', gap: '16px' }}>
+                            <div style={{ fontSize: '3rem', opacity: 0.2 }}>📊</div>
+                            <div>No active simulation data.</div>
+                        </div>
+                    ) : (
+                        <>
+                            {/* Flavor Radar Card */}
+                            <div style={{
+                                background: '#fff',
+                                borderRadius: '16px',
+                                padding: '16px',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+                                border: '1px solid rgba(0,0,0,0.05)',
+                                flexShrink: 0
+                            }}>
+                                <FlavorRadar data={flavorData} />
+                            </div>
+
+                            {/* Nutrition Card */}
+                            <div style={{
+                                background: '#fff',
+                                borderRadius: '16px',
+                                padding: '16px',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+                                border: '1px solid rgba(0,0,0,0.05)',
+                                flexShrink: 0
+                            }}>
+                                <NutrientGauge nutrition={nutrition} />
+                            </div>
+
+                            {/* Recipe Inspiration */}
+                            <div style={{
+                                background: '#fff',
+                                borderRadius: '16px',
+                                padding: '16px',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+                                border: '1px solid rgba(0,0,0,0.05)',
+                                flexShrink: 0
+                            }}>
+                                <RecipeInspiration onImport={onImport} currentIngredients={selectedIngredients} />
+                            </div>
+
+                            {/* Alerts */}
+                            <div style={{ flexShrink: 0 }}>
+                                <InteractionAlert activeAlerts={alerts} />
+                            </div>
+                        </>
+                    )}
+                </div>
             </div>
         </div>
     );

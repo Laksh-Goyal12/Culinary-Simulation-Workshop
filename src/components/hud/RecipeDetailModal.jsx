@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { X, Check, Flame, List, Play, ChefHat } from 'lucide-react';
+import { X, Check, Flame, List, Play, ChefHat, Clock, Utensils } from 'lucide-react';
 import { fetchRecipeDetails } from '../../api/recipeDB';
 
-const RecipeDetailModal = ({ recipeId, onClose, onImport }) => {
+const RecipeDetailModal = ({ recipeId, onClose, onImport, initialTitle, initialCategory, initialCalories }) => {
     const [details, setDetails] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        if (!recipeId) {
+            setError('Recipe ID is invalid or missing.');
+            setLoading(false);
+            return;
+        }
         const load = async () => {
             setLoading(true);
             try {
@@ -30,12 +35,30 @@ const RecipeDetailModal = ({ recipeId, onClose, onImport }) => {
         if (!details) return;
         // Use details.ingredients as returned by recipeDB
         if (onImport) {
-            onImport(details.ingredients || [], details.title || details.Recipe_title);
+            onImport(details.ingredients || [], details.title || details.Recipe_title || initialTitle);
         }
         onClose();
     };
 
     if (!recipeId) return null;
+
+    // Helper to get safe values (prefer API details, fallback to initial props)
+    const getSafeTitle = () => details?.title || details?.Recipe_title || initialTitle || 'Untitled Recipe';
+    const getSafeCategory = () => details?.category || initialCategory || 'Culinary Archive';
+    const getSafeCalories = () => details?.nutrition?.calories || initialCalories || '---';
+
+    // Deterministic gradient for header if no image
+    const getHeaderGradient = (title) => {
+        const colors = [
+            'linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%)',
+            'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)',
+            'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
+        ];
+        const index = (title || 'Dish').length % colors.length;
+        return colors[index];
+    };
 
     return (
         <div style={{
@@ -44,29 +67,34 @@ const RecipeDetailModal = ({ recipeId, onClose, onImport }) => {
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'rgba(0,0,0,0.8)',
+            background: 'rgba(0,0,0,0.6)',
+            backdropFilter: 'blur(8px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 1000,
-            animation: 'fadeIn 0.2s ease-out'
-        }}>
+            zIndex: 9999, /* Ensure it's above everything */
+            animation: 'fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+        }}
+            onClick={(e) => {
+                // Close on backdrop click
+                if (e.target === e.currentTarget) onClose();
+            }}
+        >
             <div
                 className="card-3d"
                 style={{
                     width: '90%',
-                    maxWidth: '800px',
+                    maxWidth: '900px',
                     height: '85vh',
                     display: 'flex',
                     flexDirection: 'column',
-                    padding: 0, // Reset padding for hero image
+                    padding: 0,
                     position: 'relative',
                     overflow: 'hidden',
-                    border: 'none',
-                    boxShadow: '0 20px 60px rgba(0,0,0,0.2)', /* Deep Floating Shadow - Softened */
-                    background: 'var(--bg-panel)',
-                    borderRadius: '32px'
+                    border: '1px solid rgba(255,255,255,0.8)',
+                    boxShadow: '0 40px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.5)',
+                    background: '#fff',
+                    borderRadius: '24px'
                 }}
             >
                 {/* Close Button */}
@@ -74,160 +102,240 @@ const RecipeDetailModal = ({ recipeId, onClose, onImport }) => {
                     onClick={onClose}
                     style={{
                         position: 'absolute',
-                        top: '16px',
-                        right: '16px',
-                        background: '#fff',
+                        top: '20px',
+                        right: '20px',
+                        background: 'rgba(255,255,255,0.9)',
                         border: 'none',
-                        color: '#000',
+                        color: '#333',
                         cursor: 'pointer',
-                        zIndex: 10,
-                        padding: '10px',
+                        zIndex: 20,
+                        width: '40px',
+                        height: '40px',
                         borderRadius: '50%',
-                        boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                         transition: 'transform 0.1s'
                     }}
-                    onMouseDown={e => e.currentTarget.style.transform = 'scale(0.9)'}
+                    onMouseDown={e => e.currentTarget.style.transform = 'scale(0.95)'}
                     onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
                 >
-                    <X size={24} />
+                    <X size={20} fontWeight="bold" />
                 </button>
 
                 {loading ? (
-                    <div style={{ padding: '40px', textAlign: 'center' }}>Loading Recipe Data...</div>
+                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '16px' }}>
+                        <div className="" style={{
+                            padding: '12px',
+                            background: 'rgba(41, 128, 185, 0.05)',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            <div className="loader-ring"></div>
+                        </div>
+                        <div style={{ color: 'var(--text-secondary)', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {initialTitle ? `Reviewing "${initialTitle}"...` : 'Reviewing Recipe...'}
+                        </div>
+                    </div>
                 ) : error ? (
                     <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-alert-red)' }}>{error}</div>
                 ) : (
                     <>
-                        {/* Hero Header */}
-                        <div style={{ height: '300px', position: 'relative', flexShrink: 0 }}>
-                            {details.image ? (
+                        {/* Header Section - Adaptive */}
+                        {details.image ? (
+                            // IMAGE HEADER
+                            <div style={{ height: '350px', position: 'relative', flexShrink: 0 }}>
                                 <img
                                     src={details.image}
-                                    alt={details.title}
-                                    onError={(e) => {
-                                        e.target.style.display = 'none';
-                                        e.target.nextSibling.style.display = 'flex';
-                                    }}
+                                    alt={getSafeTitle()}
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
-                            ) : null}
-
-                            {/* Fallback Hero Pattern */}
-                            <div style={{
-                                display: details.image ? 'none' : 'flex',
-                                width: '100%',
-                                height: '100%',
-                                background: (() => {
-                                    const colors = [
-                                        'linear-gradient(135deg, #FF9A9E 0%, #FECFEF 99%, #FECFEF 100%)',
-                                        'linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%)',
-                                        'linear-gradient(120deg, #f093fb 0%, #f5576c 100%)',
-                                        'linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%)',
-                                        'linear-gradient(to top, #fbc2eb 0%, #a6c1ee 100%)',
-                                        'linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%)'
-                                    ];
-                                    const index = (details.title || 'Dish').length % colors.length;
-                                    return colors[index];
-                                })(),
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}>
-                                <ChefHat size={80} color="rgba(255,255,255,0.6)" />
-                            </div>
-                            <div style={{
-                                position: 'absolute',
-                                bottom: 0,
-                                left: 0,
-                                right: 0,
-                                background: 'linear-gradient(0deg, var(--bg-panel) 0%, rgba(255,255,255,0.8) 50%, rgba(0,0,0,0) 100%)',
-                                height: '100%',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'flex-end',
-                                padding: '24px'
-                            }}>
-                                <div style={{ display: 'flex', gap: '12px', marginBottom: '8px' }}>
-                                    <span style={{
-                                        background: 'var(--color-neon-cyan)', color: '#fff',
-                                        padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold'
-                                    }}>
-                                        {details.category}
-                                    </span>
-                                    <span style={{
-                                        background: 'rgba(0,0,0,0.6)', color: '#fff',
-                                        padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px'
-                                    }}>
-                                        <Flame size={14} /> {details.nutrition?.calories || 0} kcal
-                                    </span>
-                                </div>
-                                <h2 style={{
-                                    fontSize: '2.5rem',
-                                    margin: 0,
-                                    color: '#fff',
-                                    textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-                                    lineHeight: 1.2
+                                <div style={{
+                                    position: 'absolute',
+                                    bottom: 0,
+                                    left: 0,
+                                    right: 0,
+                                    background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0) 100%)',
+                                    height: '100%',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'flex-end',
+                                    padding: '32px'
                                 }}>
-                                    {details.title || details.Recipe_title || 'Untitled Recipe'}
+                                    <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                                        <span style={{
+                                            background: 'var(--color-neon-cyan)', color: '#fff',
+                                            padding: '4px 12px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 'bold',
+                                            textTransform: 'uppercase', letterSpacing: '0.5px'
+                                        }}>
+                                            {getSafeCategory()}
+                                        </span>
+                                    </div>
+                                    <h2 style={{
+                                        fontSize: '3rem',
+                                        margin: '0 0 8px 0',
+                                        color: '#fff',
+                                        textShadow: '0 2px 10px rgba(0,0,0,0.5)',
+                                        lineHeight: 1.1,
+                                        fontFamily: 'var(--font-header)'
+                                    }}>
+                                        {getSafeTitle()}
+                                    </h2>
+                                </div>
+                            </div>
+                        ) : (
+                            // NO IMAGE HEADER - Clean & Typographic
+                            <div style={{
+                                background: '#fff',
+                                padding: '40px 32px 24px 32px',
+                                borderBottom: '1px solid rgba(0,0,0,0.05)',
+                                position: 'relative'
+                            }}>
+                                {/* Decorative Top Line */}
+                                <div style={{
+                                    position: 'absolute', top: 0, left: 0, right: 0, height: '8px',
+                                    background: getHeaderGradient(getSafeTitle())
+                                }} />
+
+                                <span style={{
+                                    color: 'var(--text-secondary)',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '1.5px',
+                                    fontSize: '0.8rem',
+                                    fontWeight: '700',
+                                    marginBottom: '16px',
+                                    display: 'block'
+                                }}>
+                                    {getSafeCategory()}
+                                </span>
+
+                                <h2 style={{
+                                    fontSize: '3rem',
+                                    margin: 0,
+                                    color: 'var(--text-primary)',
+                                    lineHeight: 1.1,
+                                    fontFamily: 'var(--font-header)'
+                                }}>
+                                    {getSafeTitle()}
                                 </h2>
                             </div>
-                        </div>
+                        )}
 
-                        {/* Content */}
-                        <div style={{ padding: '24px', overflowY: 'auto', flex: 1, display: 'flex', gap: '32px', flexDirection: 'row' }}>
-
-                            {/* Left Col: Ingredients */}
-                            <div style={{ flex: 1, minWidth: '300px' }}>
-                                <h3 className="neon-text-cyan" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '8px', marginBottom: '16px' }}>
-                                    <List size={18} style={{ display: 'inline', marginRight: '8px' }} />
-                                    Ingredients ({details.ingredients ? details.ingredients.length : 0})
-                                </h3>
-
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    {details.ingredients && details.ingredients.map((ing, idx) => (
-                                        <div key={idx} style={{
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            padding: '12px',
-                                            background: 'rgba(0,0,0,0.03)',
-                                            borderRadius: '8px',
-                                            border: '1px solid transparent',
-                                            transition: 'border-color 0.2s'
-                                        }}
-                                            onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--text-muted)'}
-                                            onMouseLeave={(e) => e.currentTarget.style.borderColor = 'transparent'}
-                                        >
-                                            <span style={{ color: 'var(--text-primary)' }}>{ing.name}</span>
-                                            <span style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
-                                                {ing.quantity} {ing.unit}
-                                            </span>
-                                        </div>
-                                    ))}
+                        {/* Content Body */}
+                        <div style={{ padding: '0', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                            {/* Metadata Bar */}
+                            <div style={{
+                                display: 'flex',
+                                gap: '24px',
+                                padding: '20px 32px',
+                                background: '#f9f9f9',
+                                borderBottom: '1px solid rgba(0,0,0,0.05)',
+                                alignItems: 'center'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: '500' }}>
+                                    <Flame size={18} color="var(--color-neon-orange)" />
+                                    {getSafeCalories()} kcal
                                 </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: '500' }}>
+                                    <Utensils size={18} color="var(--color-neon-blue)" />
+                                    {details.ingredients ? details.ingredients.length : 0} Ingredients
+                                </div>
+                                {/* Add more functional icons here if data exists, e.g. time */}
                             </div>
 
-                            {/* Right Col: Instructions & Actions */}
-                            <div style={{ flex: 1.5 }}>
-                                <h3 className="neon-text-green" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '8px', marginBottom: '16px' }}>
-                                    Instruction Protocol
-                                </h3>
-                                <div style={{
-                                    lineHeight: '1.6',
-                                    color: 'var(--text-secondary)',
-                                    whiteSpace: 'pre-wrap',
-                                    fontSize: '0.95rem'
-                                }}>
-                                    {details.instructions || "No instructions provided for this recipe procedure."}
+                            <div style={{ display: 'flex', padding: '32px', gap: '48px', flexWrap: 'wrap' }}>
+                                {/* Left Col: Ingredients */}
+                                <div style={{ flex: '1 1 300px' }}>
+                                    <h3 style={{
+                                        fontSize: '1.2rem',
+                                        color: 'var(--text-primary)',
+                                        marginBottom: '20px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px'
+                                    }}>
+                                        <div style={{ width: '4px', height: '24px', background: 'var(--color-neon-cyan)', borderRadius: '2px' }} />
+                                        Mise en place
+                                    </h3>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        {details.ingredients && details.ingredients.map((ing, idx) => (
+                                            <div key={idx} style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                padding: '12px 16px',
+                                                background: '#fff',
+                                                borderRadius: '12px',
+                                                border: '1px solid #eee',
+                                                boxShadow: '0 2px 5px rgba(0,0,0,0.02)',
+                                                alignItems: 'center'
+                                            }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                    <div style={{
+                                                        width: '8px', height: '8px', borderRadius: '50%',
+                                                        background: 'var(--color-neon-cyan)', opacity: 0.5
+                                                    }} />
+                                                    <span style={{ color: 'var(--text-primary)', fontWeight: '500' }}>{ing.name}</span>
+                                                </div>
+                                                <span style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', fontSize: '0.9rem', background: '#f5f5f5', padding: '2px 8px', borderRadius: '4px' }}>
+                                                    {ing.quantity} {ing.unit}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
 
-                                <div style={{ marginTop: '40px', display: 'flex', gap: '16px' }}>
-                                    <button
-                                        className="btn-gamified"
-                                        onClick={handleImport}
-                                        style={{ flex: 1 }}
-                                    >
-                                        <Play size={20} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }} />
-                                        COOK THIS DISH
-                                    </button>
+                                {/* Right Col: Instructions */}
+                                <div style={{ flex: '1.5 1 400px' }}>
+                                    <h3 style={{
+                                        fontSize: '1.2rem',
+                                        color: 'var(--text-primary)',
+                                        marginBottom: '20px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px'
+                                    }}>
+                                        <div style={{ width: '4px', height: '24px', background: 'var(--color-neon-green)', borderRadius: '2px' }} />
+                                        Preparation
+                                    </h3>
+
+                                    <div style={{
+                                        lineHeight: '1.8',
+                                        color: 'var(--text-secondary)',
+                                        background: '#fcfcfc',
+                                        padding: '24px',
+                                        borderRadius: '16px',
+                                        border: '1px solid #eee',
+                                        fontSize: '1rem',
+                                        whiteSpace: 'pre-line' // Respect newlines
+                                    }}>
+                                        {details.instructions || "No specific instructions provided for this recipe procedure."}
+                                    </div>
+
+                                    <div style={{ marginTop: '32px' }}>
+                                        <button
+                                            className="btn-gamified"
+                                            onClick={handleImport}
+                                            style={{
+                                                width: '100%',
+                                                padding: '16px',
+                                                fontSize: '1.1rem',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                gap: '12px'
+                                            }}
+                                        >
+                                            <Play size={24} fill="currentColor" />
+                                            <span>Start Cooking Procedure</span>
+                                        </button>
+                                        <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                            Imports ingredients to the mixing vessel
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
