@@ -349,7 +349,16 @@ export const filterValidRecipes = async (recipes) => {
             //     // RETURN NULL REMOVED - Let them pass but maybe warn?
             // }
 
-            return recipe;
+            // Merge detailed info into the returned recipe object so the UI can use it
+            return {
+                ...recipe,
+                // Ensure consistent naming - Fallback to existing title if details.title is missing
+                Recipe_title: details.title || recipe.Recipe_title || recipe.title || 'Untitled Dish',
+                image_url: details.image || recipe.image_url || recipe.Image_url,
+                calories: details.nutrition?.calories || 0,
+                ingredientCount: details.ingredients ? details.ingredients.length : 0,
+                category: details.category || 'General'
+            };
         } catch (e) {
             console.warn(`[Validation] Error checking recipe ${recipe.Recipe_id}`, e);
             return null;

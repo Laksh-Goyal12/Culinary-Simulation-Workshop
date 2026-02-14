@@ -40,7 +40,7 @@ const Dashboard = ({ simulationHistory, ingredientVaultSize }) => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 10px 25px rgba(0,0,0,0.2), inset 0 -5px 10px rgba(0,0,0,0.1)',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.15), inset 0 -5px 10px rgba(0,0,0,0.05)',
                     border: '4px solid #fff'
                 }}>
                     <ChefHat size={50} color="#fff" strokeWidth={2.5} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
@@ -50,7 +50,7 @@ const Dashboard = ({ simulationHistory, ingredientVaultSize }) => {
                         fontSize: '3rem',
                         margin: 0,
                         color: 'var(--text-primary)',
-                        textShadow: '2px 2px 0px rgba(255,255,255,0.5), 4px 4px 0px rgba(0,0,0,0.05)'
+                        textShadow: '2px 2px 0px rgba(255,255,255,0.3), 4px 4px 0px rgba(0,0,0,0.03)'
                     }}>HEAD CHEF</h1>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginTop: '10px' }}>
                         <span className="unit-text" style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#fff', background: 'var(--color-molecular-blue)', padding: '4px 12px', borderRadius: '12px', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>Level {stats.level}</span>

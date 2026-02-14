@@ -210,57 +210,102 @@ const SearchDish = () => {
                                                 overflow: 'hidden',
                                                 position: 'relative',
                                                 animation: `slideUp 0.5s ease forwards ${index * 0.05}s`,
-                                                opacity: 0, // Initial state for animation
-                                                border: '1px solid rgba(255,255,255,0.6)',
+                                                opacity: 0,
+                                                border: 'none',
                                                 background: '#fff',
-                                                padding: 0
+                                                borderRadius: '16px',
+                                                padding: 0,
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                minHeight: '160px',
+                                                justifyContent: 'space-between',
+                                                transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.transform = 'translateY(-5px) scale(1.02)';
+                                                e.currentTarget.style.boxShadow = '0 15px 30px rgba(0,0,0,0.15)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                                                e.currentTarget.style.boxShadow = '';
                                             }}
                                         >
-                                            <div style={{ height: '180px', background: '#ccc', position: 'relative', overflow: 'hidden' }}>
-                                                <img
-                                                    src={recipe.image_url}
-                                                    alt={recipe.Recipe_title || recipe.Recipe_title}
-                                                    onError={(e) => {
-                                                        e.target.onerror = null;
-                                                        e.target.src = 'https://placehold.co/400x300/e0e0e0/333?text=Dish';
-                                                    }}
-                                                    style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s' }}
-                                                />
+                                            {/* Decorative Top Gradient Line based on title hash */}
+                                            <div style={{
+                                                height: '6px',
+                                                width: '100%',
+                                                background: (() => {
+                                                    const colors = [
+                                                        'linear-gradient(90deg, #FF9A9E 0%, #FECFEF 100%)',
+                                                        'linear-gradient(90deg, #84fab0 0%, #8fd3f4 100%)',
+                                                        'linear-gradient(90deg, #f093fb 0%, #f5576c 100%)',
+                                                        'linear-gradient(90deg, #4facfe 0%, #00f2fe 100%)',
+                                                        'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)'
+                                                    ];
+                                                    const index = (recipe.Recipe_title || 'Dish').length % colors.length;
+                                                    return colors[index];
+                                                })()
+                                            }} />
+
+                                            <div style={{ padding: '24px 24px 0 24px', flex: 1 }}>
+                                                {/* Category Label */}
                                                 <div style={{
-                                                    position: 'absolute',
-                                                    bottom: 0,
-                                                    left: 0,
-                                                    right: 0,
-                                                    background: 'linear-gradient(0deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 100%)',
-                                                    height: '60%'
-                                                }} />
-                                            </div>
-                                            <div style={{ padding: '16px' }}>
-                                                <h3 style={{
-                                                    margin: '0 0 8px 0',
-                                                    fontSize: '1.2rem',
-                                                    color: 'var(--text-primary)',
-                                                    whiteSpace: 'nowrap',
-                                                    overflow: 'hidden',
-                                                    textOverflow: 'ellipsis'
+                                                    fontSize: '0.75rem',
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '1px',
+                                                    color: 'var(--text-secondary)',
+                                                    marginBottom: '8px',
+                                                    fontWeight: '600'
                                                 }}>
-                                                    {recipe.Recipe_title || recipe.Recipe_title || 'Unknown Dish'}
-                                                </h3>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                    <span style={{
-                                                        fontSize: '0.8rem',
-                                                        color: '#fff',
-                                                        background: 'var(--color-neon-cyan)',
-                                                        padding: '4px 8px',
-                                                        borderRadius: '4px',
-                                                        fontWeight: 'bold'
-                                                    }}>
-                                                        {Math.floor(Math.random() * 300 + 100)} kcal
-                                                    </span>
-                                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                                                        Click to view
-                                                    </span>
+                                                    {recipe.category || 'Culinary Archive'}
                                                 </div>
+
+                                                <h3 style={{
+                                                    margin: '0 0 16px 0',
+                                                    fontSize: '1.4rem',
+                                                    color: 'var(--text-primary)',
+                                                    lineHeight: '1.3',
+                                                    fontWeight: '700',
+                                                    fontFamily: 'var(--font-header)'
+                                                }}>
+                                                    {recipe.Recipe_title || 'Unknown Dish'}
+                                                </h3>
+                                            </div>
+
+                                            <div style={{
+                                                padding: '0 24px 24px 24px',
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                marginTop: 'auto'
+                                            }}>
+                                                <div style={{ display: 'flex', gap: '8px' }}>
+                                                    {/* Data Pills - Minimalist */}
+                                                    <span style={{
+                                                        fontSize: '0.85rem',
+                                                        color: 'var(--text-secondary)',
+                                                        background: '#f5f5f5',
+                                                        padding: '4px 10px',
+                                                        borderRadius: '8px',
+                                                        fontWeight: '500'
+                                                    }}>
+                                                        🔥 {recipe.categories || recipe.calories || '?'}
+                                                    </span>
+                                                    {recipe.ingredientCount > 0 && (
+                                                        <span style={{
+                                                            fontSize: '0.85rem',
+                                                            color: 'var(--text-secondary)',
+                                                            background: '#f5f5f5',
+                                                            padding: '4px 10px',
+                                                            borderRadius: '8px',
+                                                            fontWeight: '500'
+                                                        }}>
+                                                            🥣 {recipe.ingredientCount}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                <ChefHat size={20} color="var(--color-neon-cyan)" style={{ opacity: 0.8 }} />
                                             </div>
                                         </div>
                                     ))}

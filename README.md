@@ -1,60 +1,69 @@
-# 🧬 Culinary Simulation Workshop
+# 🍽️ Culinary Arcade
 
-**Level Up Your Culinary Alchemy.** This application is a high-performance molecular gastronomy simulator designed to help chefs and food scientists experiment with complex flavor profiles, nutrient balances, and biological synergies.
+Culinary Arcade is a high-performance, gamified molecular gastronomy simulator. It allows chefs and food enthusiasts to experiment with ingredients, discover recipes through a "sci-fi" lab interface, and track their culinary achievements.
 
----
+![License](https://img.shields.io/badge/license-MIT-blue.svg) ![Version](https://img.shields.io/badge/version-1.2.0_BETA-green.svg)
 
-## 🚀 Quick Start
+## 🌟 Key Features
 
-### 1. Prerequisites
-- **Node.js** (v18 or higher recommended)
-- **NPM** or **Yarn**
+### 🧪 Molecular Simulation
+- **Ingredient Vault**: Browse a vast database of ingredients with real-world nutritional and flavor data.
+- **Mixing Vessel**: Combine ingredients throughout a physically simulated environment with temperature and viscosity controls.
+- **Recipe Identification**: Automatically identifies known recipes from your unique combinations using the Foodoscope API.
 
-### 2. Installation
-```bash
-# Clone the repository (if applicable)
-# Navigate to the project directory
-cd Project
+### 🎮 Gamification
+- **XP & Leveling System**: Earn experience points for every experiment and recipe discovery. Rank up from *Sous Chef* to *Executive Chef*.
+- **Achievements**: Track mastered recipes and total experiments cooked.
+- **Interactive UI**: Tactile 3D buttons, glassmorphism aesthetics, and smooth animations.
 
-# Install dependencies
-npm install
-```
+### 📊 Advanced Analytics
+- **Flavor Radar**: Visual breakdown of taste profiles (Sweet, Sour, Salty, Bitter, Savory, Spicy).
+- **Nutrient Gauge**: Real-time calculation of calories, proteins, fats, and carbs.
+- **Interaction Alerts**: Detects unique chemical synergies between specific ingredients.
 
-### 3. Launch the Workshop
-```bash
-npm run dev
-```
-Open [http://localhost:5173](http://localhost:5173) to access the dashboard.
+## 🚀 Getting Started
 
----
+### Prerequisites
+- Node.js (v18+)
+- npm or yarn
 
-## 🛠 Features
+### Installation
 
-### 🧊 Ingredient Vault (Left Panel)
-- **Local Compounds**: Explore a curated list of molecular ingredients, produce, and spirits.
-- **Global Network Search**: If a compound isn't found locally, the system automatically queries a live recipe database to fetch molecular data.
-- **Filtering**: Sort by Spices, Molecules, Spirits, or Produce.
+1.  Clone the repository:
+    ```bash
+    git clone https://github.com/yourusername/culinary-arcade.git
+    cd culinary-arcade
+    ```
 
-### ⚗️ Mixing Vessel (Center Panel)
-- **Compound Assembly**: Add ingredients to the vessel to see real-time updates on **Temperature** and **Viscosity**.
-- **Initiate Simulation**: Trigger a 10-second molecular processing event to analyze your concoction.
-- **System Log**: Real-time terminal output of simulation events.
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
 
-### 📊 Simulation HUD (Right Panel)
-- **Flavor Radar**: Balanced visualization of Five Tastes (Sweet, Sour, Spicy, Bitter, Savory).
-- **Macro-Nutrient Gauge**: Precise breakdown of Calories, Protein, Fat, and Carbohydrates.
-- **Bio-Synergy Alerts**: Warnings and recommendations based on molecular interactions (e.g., Anti-inflammatory synergies).
-- **Molecular Inspiration**: Live feed of recipes matching your selected ingredients.
+3.  Start the development server:
+    ```bash
+    npm run dev
+    ```
 
----
+4.  Open your browser at `http://localhost:5173`.
 
-## 🧪 Technology Stack
-- **Framework**: [React](https://reactjs.org/) + [Vite](https://vitejs.dev/)
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **Styling**: Vanilla CSS (Custom Glassmorphism Design System)
-- **API**: [Foodoscope RecipeDB](https://api.foodoscope.com/) (Chained Proxy Integration)
+## 🏗 Project Structure
 
----
+-   `src/components/vault`: Ingredient selection and vault management.
+-   `src/components/mixing`: Core simulation logic and mixing vessel interface.
+-   `src/components/hud`: Visualization tools (Radar, Gauges) and results display.
+-   `src/pages`: Main application views (Dashboard, Inventory, Search, Lab Results).
+-   `src/utils`: Helper functions for caching and local storage management.
 
-## 👨‍🔬 Developed by
-**Chef Alchemist** - *LVL 42 Molecular Gastronomy*
+## 🎨 Design Philosophy
+The UI follows a **"Warm Tactical"** aesthetic (Apricot Pop), combining inviting colors with precision-instrument styling. It uses a robust flex-grid layout to ensure responsiveness across devices.
+
+## 🤝 Contributing
+1.  Fork the Project
+2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the Branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
+
+## 📄 License
+Distributed under the MIT License. See `LICENSE` for more information.

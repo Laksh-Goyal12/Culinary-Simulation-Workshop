@@ -126,7 +126,7 @@ const SimulationHUD = ({ selectedIngredients: data, onImport }) => {
                         background: '#f8f9fa',
                         borderRadius: '16px',
                         marginBottom: '8px',
-                        boxShadow: 'inset 2px 2px 6px rgba(0,0,0,0.05), inset -2px -2px 6px rgba(255,255,255,0.8)' /* Inset Readout */
+                        boxShadow: 'inset 2px 2px 6px rgba(0,0,0,0.05), inset -2px -2px 6px rgba(255,255,255,0.5)' /* Inset Readout - Softened */
                     }}>
                         <div style={{ fontSize: '0.8rem', color: 'var(--color-neon-blue)', marginBottom: '12px', textAlign: 'center', fontWeight: 'bold', letterSpacing: '1px' }}>
                             RECIPE COMPARISON

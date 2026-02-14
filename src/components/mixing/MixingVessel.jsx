@@ -1,96 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { RotateCcw, Flame, Thermometer, Gauge } from 'lucide-react';
-
+import React from 'react';
+import { RotateCcw, Flame } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const MixingVessel = ({ selectedIngredients, onRemove, onUpdate, onProcess, onReset, status, logs }) => {
-    // Local state for sensor overrides
-    const [tempOverride, setTempOverride] = useState(62);
-    const [viscOverride, setViscOverride] = useState(1.2);
-
-    // Update overrides when ingredients change (if not processing)
-    useEffect(() => {
-        if (status !== 'processing') {
-            if (selectedIngredients.length > 0) {
-                setTempOverride(62 + (selectedIngredients.length * 1.5));
-                setViscOverride(parseFloat((1.2 + (selectedIngredients.length * 0.1)).toFixed(2)));
-            } else {
-                setTempOverride(62);
-                setViscOverride(1.2);
-            }
-        }
-    }, [selectedIngredients, status]);
 
     return (
-        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', paddingBottom: '24px' }}>
+        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', paddingBottom: '24px', overflow: 'hidden' }}>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
-
-                {/* Cook Controls / Sensors */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px', gap: '16px' }}>
-                    {/* Heat Control */}
-                    <div className="card-3d" style={{ flex: 1, padding: '16px', borderRadius: '16px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: '800' }}>
-                                <Thermometer size={18} color="var(--color-alert-red)" /> HEAT
-                            </div>
-                            <div className="unit-text" style={{ fontSize: '1rem', fontWeight: '700' }}>{Math.round(tempOverride)}°C</div>
-                        </div>
-                        <div style={{ position: 'relative', height: '12px', background: '#ddd', borderRadius: '10px', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)' }}>
-                            <input
-                                type="range"
-                                min="0" max="100"
-                                value={tempOverride}
-                                onChange={(e) => setTempOverride(Number(e.target.value))}
-                                disabled={status === 'processing'}
-                                style={{
-                                    position: 'absolute', top: '-6px', left: 0, width: '100%', height: '20px',
-                                    opacity: 0, cursor: 'pointer', zIndex: 2
-                                }}
-                            />
-                            <div style={{
-                                width: `${tempOverride}%`, height: '100%', background: 'var(--color-alert-red)', borderRadius: '10px',
-                                boxShadow: '0 2px 5px rgba(0,0,0,0.2)', transition: 'width 0.1s'
-                            }} />
-                            <div style={{
-                                position: 'absolute', left: `${tempOverride}%`, top: '-4px', width: '20px', height: '20px',
-                                background: '#fff', borderRadius: '50%', boxShadow: '0 2px 5px rgba(0,0,0,0.3)', transform: 'translateX(-50%)',
-                                zIndex: 1
-                            }} />
-                        </div>
-                    </div>
-
-                    {/* Pressure/Viscosity Control */}
-                    <div className="card-3d" style={{ flex: 1, padding: '16px', borderRadius: '16px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: '800' }}>
-                                <Gauge size={18} color="var(--color-neon-cyan)" /> PRESS
-                            </div>
-                            <div className="unit-text" style={{ fontSize: '1rem', fontWeight: '700' }}>{Number(viscOverride).toFixed(1)} Bar</div>
-                        </div>
-                        <div style={{ position: 'relative', height: '12px', background: '#ddd', borderRadius: '10px', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)' }}>
-                            <input
-                                type="range"
-                                min="0.1" max="10.0" step="0.1"
-                                value={viscOverride}
-                                onChange={(e) => setViscOverride(Number(e.target.value))}
-                                disabled={status === 'processing'}
-                                style={{
-                                    position: 'absolute', top: '-6px', left: 0, width: '100%', height: '20px',
-                                    opacity: 0, cursor: 'pointer', zIndex: 2
-                                }}
-                            />
-                            <div style={{
-                                width: `${(viscOverride / 10) * 100}%`, height: '100%', background: 'var(--color-neon-cyan)', borderRadius: '10px',
-                                boxShadow: '0 2px 5px rgba(0,0,0,0.2)', transition: 'width 0.1s'
-                            }} />
-                            <div style={{
-                                position: 'absolute', left: `${(viscOverride / 10) * 100}%`, top: '-4px', width: '20px', height: '20px',
-                                background: '#fff', borderRadius: '50%', boxShadow: '0 2px 5px rgba(0,0,0,0.3)', transform: 'translateX(-50%)',
-                                zIndex: 1
-                            }} />
-                        </div>
-                    </div>
-                </div>
+                {/* Cook Controls / Sensors - REMOVED per user request */}
 
                 {/* Central Cooking Pot - 3D BOWL */}
                 <div style={{
@@ -108,7 +25,7 @@ const MixingVessel = ({ selectedIngredients, onRemove, onUpdate, onProcess, onRe
                     width: '100%',
                     maxWidth: '400px',
                     alignSelf: 'center',
-                    boxShadow: 'inset 10px 10px 30px rgba(0,0,0,0.1), inset -5px -5px 15px rgba(255,255,255,0.8), 20px 20px 60px rgba(0,0,0,0.15), -20px -20px 60px rgba(255,255,255,0.4)', /* Deep 3D */
+                    boxShadow: 'inset 10px 10px 30px rgba(0,0,0,0.05), inset -5px -5px 15px rgba(255,255,255,0.5), 20px 20px 60px rgba(0,0,0,0.1), -20px -20px 60px rgba(255,255,255,0.3)', /* Deep 3D - Softened */
                     border: '8px solid #f0f0f0'
                 }}>
 
@@ -138,7 +55,7 @@ const MixingVessel = ({ selectedIngredients, onRemove, onUpdate, onProcess, onRe
                     {/* Inner Bowl Shadow/Depth */}
                     <div style={{
                         position: 'absolute', inset: '20px', borderRadius: '50%',
-                        boxShadow: 'inset 10px 10px 20px rgba(0,0,0,0.15), inset -5px -5px 15px rgba(255,255,255,0.8)',
+                        boxShadow: 'inset 10px 10px 20px rgba(0,0,0,0.1), inset -5px -5px 15px rgba(255,255,255,0.5)',
                         background: 'radial-gradient(circle at 70% 70%, #f0f0f0 0%, #ddd 100%)',
                         zIndex: 1
                     }}></div>
@@ -240,8 +157,6 @@ const MixingVessel = ({ selectedIngredients, onRemove, onUpdate, onProcess, onRe
                         {status === 'processing' ? 'COOKING...' : 'COOK DISH'}
                     </button>
                 </div>
-
-
             </div>
         </div>
     );

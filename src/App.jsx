@@ -52,7 +52,7 @@ const App = () => {
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
 
-      <div style={{ flex: 1, overflow: 'hidden' }}>
+      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {currentPage === 'dashboard' && (
           <Dashboard
             simulationHistory={simulationHistory}

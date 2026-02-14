@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { X, Check } from 'lucide-react';
+import { X, Check, Flame, List, Play, ChefHat } from 'lucide-react';
 import { fetchRecipeDetails } from '../../api/recipeDB';
 
 const RecipeDetailModal = ({ recipeId, onClose, onImport }) => {
@@ -64,7 +64,7 @@ const RecipeDetailModal = ({ recipeId, onClose, onImport }) => {
                     position: 'relative',
                     overflow: 'hidden',
                     border: 'none',
-                    boxShadow: '0 20px 60px rgba(0,0,0,0.4)', /* Deep Floating Shadow */
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.2)', /* Deep Floating Shadow - Softened */
                     background: 'var(--bg-panel)',
                     borderRadius: '32px'
                 }}
@@ -100,11 +100,40 @@ const RecipeDetailModal = ({ recipeId, onClose, onImport }) => {
                     <>
                         {/* Hero Header */}
                         <div style={{ height: '300px', position: 'relative', flexShrink: 0 }}>
-                            <img
-                                src={details.image || 'https://placehold.co/800x400/161b22/333?text=No+Image'}
-                                alt={details.title}
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            />
+                            {details.image ? (
+                                <img
+                                    src={details.image}
+                                    alt={details.title}
+                                    onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        e.target.nextSibling.style.display = 'flex';
+                                    }}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
+                            ) : null}
+
+                            {/* Fallback Hero Pattern */}
+                            <div style={{
+                                display: details.image ? 'none' : 'flex',
+                                width: '100%',
+                                height: '100%',
+                                background: (() => {
+                                    const colors = [
+                                        'linear-gradient(135deg, #FF9A9E 0%, #FECFEF 99%, #FECFEF 100%)',
+                                        'linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%)',
+                                        'linear-gradient(120deg, #f093fb 0%, #f5576c 100%)',
+                                        'linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%)',
+                                        'linear-gradient(to top, #fbc2eb 0%, #a6c1ee 100%)',
+                                        'linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%)'
+                                    ];
+                                    const index = (details.title || 'Dish').length % colors.length;
+                                    return colors[index];
+                                })(),
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}>
+                                <ChefHat size={80} color="rgba(255,255,255,0.6)" />
+                            </div>
                             <div style={{
                                 position: 'absolute',
                                 bottom: 0,
