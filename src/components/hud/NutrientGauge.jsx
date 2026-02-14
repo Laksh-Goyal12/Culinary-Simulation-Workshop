@@ -15,7 +15,7 @@ const NutrientGauge = ({ nutrition }) => {
                 </span>
             </div>
 
-            <div style={{ display: 'flex', height: '8px', borderRadius: '4px', overflow: 'hidden', background: '#333' }}>
+            <div style={{ display: 'flex', height: '8px', borderRadius: '4px', overflow: 'hidden', background: 'rgba(0,0,0,0.1)' }}>
                 <div style={{ width: `${pPct}%`, background: '#fbbf24' }} title="Protein" /> {/* Amber */}
                 <div style={{ width: `${fPct}%`, background: '#f87171' }} title="Fat" />     {/* Red */}
                 <div style={{ width: `${cPct}%`, background: '#60a5fa' }} title="Carbs" />   {/* Blue */}

@@ -9,6 +9,12 @@ export default defineConfig({
       '/recipe2-api': {
         target: 'http://cosylab.iiitd.edu.in:6969',
         changeOrigin: true,
+        secure: false,
+        configure: (proxy, options) => {
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            console.log('[Proxy]', req.method, req.url);
+          });
+        }
       },
     },
   },

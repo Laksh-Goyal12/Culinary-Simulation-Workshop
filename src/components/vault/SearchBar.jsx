@@ -1,7 +1,7 @@
 import React from 'react';
-import { Search } from 'lucide-react';
+import { Search, Loader } from 'lucide-react';
 
-const SearchBar = ({ searchTerm, setSearchTerm }) => {
+const SearchBar = ({ searchTerm, setSearchTerm, isSearching }) => {
     return (
         <div style={{ position: 'relative', marginBottom: 'var(--spacing-md)' }}>
             <Search
@@ -16,10 +16,10 @@ const SearchBar = ({ searchTerm, setSearchTerm }) => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{
                     width: '100%',
-                    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.05)',
                     border: '1px solid var(--border-color)',
                     borderRadius: '4px',
-                    padding: '10px 10px 10px 38px',
+                    padding: '10px 38px 10px 38px',
                     color: 'var(--text-primary)',
                     fontSize: '0.9rem',
                     fontFamily: 'var(--font-mono)',
@@ -35,6 +35,26 @@ const SearchBar = ({ searchTerm, setSearchTerm }) => {
                     e.target.style.boxShadow = 'none';
                 }}
             />
+            {isSearching && (
+                <div style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: 0,
+                    bottom: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    zIndex: 10,
+                    pointerEvents: 'none'
+                }}>
+                    <Loader
+                        size={18}
+                        color="var(--color-neon-cyan)"
+                        style={{
+                            animation: 'spin 1s linear infinite'
+                        }}
+                    />
+                </div>
+            )}
         </div>
     );
 };

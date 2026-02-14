@@ -19,8 +19,8 @@ const FlavorRadar = ({ data }) => {
 
             <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                 <RadarChart cx="50%" cy="50%" outerRadius="70%" data={data}>
-                    <PolarGrid stroke="#334155" />
-                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10 }} />
+                    <PolarGrid stroke="var(--border-color)" />
+                    <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
                     <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
                     <Radar
                         name="Mix Profile"

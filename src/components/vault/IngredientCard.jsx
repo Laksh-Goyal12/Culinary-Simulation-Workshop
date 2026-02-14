@@ -1,91 +1,68 @@
 import React from 'react';
-import { GripVertical, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 const IngredientCard = ({ ingredient, onAdd }) => {
     return (
         <div
-            className="panel"
+            className="card-3d card-hover"
             style={{
                 display: 'flex',
                 alignItems: 'center',
-                padding: '10px',
-                marginBottom: '8px',
+                padding: '12px 16px',
+                marginBottom: '12px',
                 cursor: 'pointer',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
+                borderRadius: '16px',
+                border: 'none',
+                background: '#fff',
                 transition: 'all 0.2s',
                 position: 'relative',
-                overflow: 'hidden'
+                overflow: 'visible' /* Changed to visible for shadow to pop */
             }}
-            onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'var(--color-neon-cyan)';
-                e.currentTarget.style.backgroundColor = 'rgba(0, 240, 255, 0.05)';
-            }}
-            onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.05)';
-                e.currentTarget.style.backgroundColor = 'var(--bg-panel)';
-            }}
+            onClick={() => onAdd(ingredient)}
         >
             {/* Icon */}
             <div style={{
-                fontSize: '1.5rem',
-                marginRight: 'var(--spacing-sm)',
-                filter: 'drop-shadow(0 0 5px rgba(255,255,255,0.2))'
+                fontSize: '2rem',
+                marginRight: '16px',
+                filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))'
             }}>
                 {ingredient.icon}
             </div>
 
             {/* Info */}
             <div style={{ flex: 1, overflow: 'hidden' }}>
-                <div style={{
-                    fontSize: '0.9rem',
-                    fontWeight: 600,
-                    color: 'var(--text-primary)',
+                <div className="unit-text" style={{
+                    fontSize: '1rem',
+                    fontWeight: 800,
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
-                    textOverflow: 'ellipsis'
+                    textOverflow: 'ellipsis',
+                    color: 'var(--text-primary)'
                 }}>
                     {ingredient.name}
-                </div>
-                <div style={{
-                    fontSize: '0.7rem',
-                    color: 'var(--text-muted)',
-                    fontStyle: 'italic',
-                    fontFamily: 'var(--font-mono)'
-                }}>
-                    {ingredient.scientific}
-                </div>
-
-                {/* Chips */}
-                <div style={{ display: 'flex', gap: '4px', marginTop: '4px', flexWrap: 'wrap' }}>
-                    {ingredient.tags.slice(0, 2).map((tag, idx) => (
-                        <span key={idx} style={{
-                            fontSize: '0.6rem',
-                            padding: '2px 4px',
-                            borderRadius: '2px',
-                            background: 'rgba(255, 255, 255, 0.1)',
-                            color: 'var(--text-secondary)'
-                        }}>
-                            {tag}
-                        </span>
-                    ))}
                 </div>
             </div>
 
             {/* Action */}
             <button
-                onClick={() => onAdd(ingredient)}
                 style={{
-                    background: 'none',
+                    background: 'var(--color-neon-green)',
                     border: 'none',
-                    color: 'var(--color-neon-cyan)',
-                    cursor: 'pointer',
-                    padding: '4px',
+                    color: '#fff',
+                    borderRadius: '50%',
+                    width: '36px',
+                    height: '36px',
                     display: 'flex',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 0 #1e8449, 0 5px 10px rgba(0,0,0,0.2)',
+                    transition: 'transform 0.1s',
+                    cursor: 'pointer'
                 }}
-                title="Add to Mixing Vessel"
+                onMouseDown={e => e.currentTarget.style.transform = 'translateY(4px)'}
+                onMouseUp={e => e.currentTarget.style.transform = 'translateY(0)'}
             >
-                <Plus size={20} />
+                <Plus size={20} strokeWidth={3} />
             </button>
         </div>
     );

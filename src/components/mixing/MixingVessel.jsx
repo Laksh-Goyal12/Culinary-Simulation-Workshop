@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { RotateCcw, Play, FlaskConical, Thermometer, Droplets } from 'lucide-react';
-import SimulationLog from './SimulationLog';
+import { RotateCcw, Flame, Thermometer, Gauge } from 'lucide-react';
+
 import { motion, AnimatePresence } from 'framer-motion';
 
 const MixingVessel = ({ selectedIngredients, onRemove, onUpdate, onProcess, onReset, status, logs }) => {
@@ -22,51 +22,77 @@ const MixingVessel = ({ selectedIngredients, onRemove, onUpdate, onProcess, onRe
     }, [selectedIngredients, status]);
 
     return (
-        <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <div className="panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
+        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', paddingBottom: '24px' }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
 
-                {/* Interactive Sensors */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--spacing-md)', gap: '16px' }}>
-
-                    {/* Temperature Control */}
-                    <div style={{ flex: 1, background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '4px', border: '1px solid rgba(255, 42, 42, 0.3)' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--color-alert-red)', fontSize: '0.8rem' }}>
-                                <Thermometer size={14} /> VESSEL_TEMP
+                {/* Cook Controls / Sensors */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px', gap: '16px' }}>
+                    {/* Heat Control */}
+                    <div className="card-3d" style={{ flex: 1, padding: '16px', borderRadius: '16px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: '800' }}>
+                                <Thermometer size={18} color="var(--color-alert-red)" /> HEAT
                             </div>
-                            <div style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-alert-red)' }}>{Math.round(tempOverride)}°C</div>
+                            <div className="unit-text" style={{ fontSize: '1rem', fontWeight: '700' }}>{Math.round(tempOverride)}°C</div>
                         </div>
-                        <input
-                            type="range"
-                            min="0" max="100"
-                            value={tempOverride}
-                            onChange={(e) => setTempOverride(Number(e.target.value))}
-                            disabled={status === 'processing'}
-                            style={{ width: '100%', accentColor: 'var(--color-alert-red)' }}
-                        />
+                        <div style={{ position: 'relative', height: '12px', background: '#ddd', borderRadius: '10px', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)' }}>
+                            <input
+                                type="range"
+                                min="0" max="100"
+                                value={tempOverride}
+                                onChange={(e) => setTempOverride(Number(e.target.value))}
+                                disabled={status === 'processing'}
+                                style={{
+                                    position: 'absolute', top: '-6px', left: 0, width: '100%', height: '20px',
+                                    opacity: 0, cursor: 'pointer', zIndex: 2
+                                }}
+                            />
+                            <div style={{
+                                width: `${tempOverride}%`, height: '100%', background: 'var(--color-alert-red)', borderRadius: '10px',
+                                boxShadow: '0 2px 5px rgba(0,0,0,0.2)', transition: 'width 0.1s'
+                            }} />
+                            <div style={{
+                                position: 'absolute', left: `${tempOverride}%`, top: '-4px', width: '20px', height: '20px',
+                                background: '#fff', borderRadius: '50%', boxShadow: '0 2px 5px rgba(0,0,0,0.3)', transform: 'translateX(-50%)',
+                                zIndex: 1
+                            }} />
+                        </div>
                     </div>
 
-                    {/* Viscosity Control */}
-                    <div style={{ flex: 1, background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '4px', border: '1px solid rgba(42, 157, 244, 0.3)' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--color-molecular-blue)', fontSize: '0.8rem' }}>
-                                <Droplets size={14} /> VISCOSITY
+                    {/* Pressure/Viscosity Control */}
+                    <div className="card-3d" style={{ flex: 1, padding: '16px', borderRadius: '16px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: '800' }}>
+                                <Gauge size={18} color="var(--color-neon-cyan)" /> PRESS
                             </div>
-                            <div style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-molecular-blue)' }}>{Number(viscOverride).toFixed(1)} Pa·s</div>
+                            <div className="unit-text" style={{ fontSize: '1rem', fontWeight: '700' }}>{Number(viscOverride).toFixed(1)} Bar</div>
                         </div>
-                        <input
-                            type="range"
-                            min="0.1" max="10.0" step="0.1"
-                            value={viscOverride}
-                            onChange={(e) => setViscOverride(Number(e.target.value))}
-                            disabled={status === 'processing'}
-                            style={{ width: '100%', accentColor: 'var(--color-molecular-blue)' }}
-                        />
+                        <div style={{ position: 'relative', height: '12px', background: '#ddd', borderRadius: '10px', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)' }}>
+                            <input
+                                type="range"
+                                min="0.1" max="10.0" step="0.1"
+                                value={viscOverride}
+                                onChange={(e) => setViscOverride(Number(e.target.value))}
+                                disabled={status === 'processing'}
+                                style={{
+                                    position: 'absolute', top: '-6px', left: 0, width: '100%', height: '20px',
+                                    opacity: 0, cursor: 'pointer', zIndex: 2
+                                }}
+                            />
+                            <div style={{
+                                width: `${(viscOverride / 10) * 100}%`, height: '100%', background: 'var(--color-neon-cyan)', borderRadius: '10px',
+                                boxShadow: '0 2px 5px rgba(0,0,0,0.2)', transition: 'width 0.1s'
+                            }} />
+                            <div style={{
+                                position: 'absolute', left: `${(viscOverride / 10) * 100}%`, top: '-4px', width: '20px', height: '20px',
+                                background: '#fff', borderRadius: '50%', boxShadow: '0 2px 5px rgba(0,0,0,0.3)', transform: 'translateX(-50%)',
+                                zIndex: 1
+                            }} />
+                        </div>
                     </div>
-
                 </div>
 
-                {/* Central Vessel Area */}
+                {/* Central Cooking Pot - 3D BOWL */}
                 <div style={{
                     flex: 1,
                     display: 'flex',
@@ -74,138 +100,91 @@ const MixingVessel = ({ selectedIngredients, onRemove, onUpdate, onProcess, onRe
                     alignItems: 'center',
                     justifyContent: 'center',
                     position: 'relative',
-                    border: '1px dashed var(--border-color)',
-                    borderRadius: '16px',
-                    margin: '0 0 var(--spacing-md) 0',
-                    background: 'radial-gradient(circle, rgba(20,20,20,0.8) 0%, rgba(0,0,0,0.8) 100%)',
-                    overflow: 'hidden'
+                    margin: '0 0 24px 0',
+                    background: 'radial-gradient(circle at 30% 30%, #f5f5f5 0%, #e0e0e0 40%, #d6d6d6 100%)', /* Metallic Ceramic */
+                    borderRadius: '50%',
+                    aspectRatio: '1/1',
+                    maxHeight: '400px',
+                    width: '100%',
+                    maxWidth: '400px',
+                    alignSelf: 'center',
+                    boxShadow: 'inset 10px 10px 30px rgba(0,0,0,0.1), inset -5px -5px 15px rgba(255,255,255,0.8), 20px 20px 60px rgba(0,0,0,0.15), -20px -20px 60px rgba(255,255,255,0.4)', /* Deep 3D */
+                    border: '8px solid #f0f0f0'
                 }}>
 
                     <AnimatePresence>
                         {status === 'processing' && (
                             <>
-                                {/* Outer Glow Ring */}
+                                {/* Cooking Fire/Glow */}
                                 <motion.div
-                                    initial={{ opacity: 0, rotate: 0 }}
-                                    animate={{ opacity: 1, rotate: 360 }}
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 0.95 }}
                                     exit={{ opacity: 0 }}
-                                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                                    transition={{ duration: 1, repeat: Infinity, repeatType: "reverse" }}
                                     style={{
                                         position: 'absolute',
-                                        width: '280px',
-                                        height: '280px',
+                                        width: '90%',
+                                        height: '90%',
                                         borderRadius: '50%',
-                                        border: '2px solid transparent',
-                                        borderTopColor: 'var(--color-neon-cyan)',
-                                        borderBottomColor: 'var(--color-neon-green)',
-                                        boxShadow: '0 0 20px rgba(0, 240, 255, 0.2)',
-                                        zIndex: 0
-                                    }}
-                                />
-
-                                {/* Inner Spinning Core */}
-                                <motion.div
-                                    initial={{ scale: 0.5, opacity: 0 }}
-                                    animate={{ scale: [1, 1.2, 1], opacity: 1, rotate: -360 }}
-                                    exit={{ opacity: 0, scale: 0 }}
-                                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                                    style={{
-                                        position: 'absolute',
-                                        width: '180px',
-                                        height: '180px',
-                                        borderRadius: '40%',
-                                        background: 'conic-gradient(from 180deg at 50% 50%, var(--color-neon-green), transparent, var(--color-neon-cyan), transparent)',
-                                        filter: 'blur(20px)',
+                                        background: 'radial-gradient(circle, rgba(230, 126, 34, 0.6) 0%, transparent 70%)',
                                         zIndex: 0,
-                                        mixBlendMode: 'screen'
-                                    }}
-                                />
-
-                                {/* Bubbles Simulation */}
-                                <motion.div
-                                    initial={{ y: 50, opacity: 0 }}
-                                    animate={{ y: -100, opacity: [0, 1, 0] }}
-                                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
-                                    style={{
-                                        position: 'absolute',
-                                        width: '20px',
-                                        height: '20px',
-                                        borderRadius: '50%',
-                                        background: 'white',
-                                        boxShadow: '0 0 10px white',
-                                        zIndex: 1
+                                        mixBlendMode: 'multiply'
                                     }}
                                 />
                             </>
                         )}
                     </AnimatePresence>
 
-                    <div style={{ zIndex: 2, textAlign: 'center', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {/* Inner Bowl Shadow/Depth */}
+                    <div style={{
+                        position: 'absolute', inset: '20px', borderRadius: '50%',
+                        boxShadow: 'inset 10px 10px 20px rgba(0,0,0,0.15), inset -5px -5px 15px rgba(255,255,255,0.8)',
+                        background: 'radial-gradient(circle at 70% 70%, #f0f0f0 0%, #ddd 100%)',
+                        zIndex: 1
+                    }}></div>
+
+                    <div style={{ zIndex: 2, textAlign: 'center', width: '80%', height: '80%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
                         {selectedIngredients.length === 0 ? (
-                            <div style={{ color: 'var(--text-muted)' }}>
-                                <FlaskConical size={48} style={{ opacity: 0.3, marginBottom: '8px' }} />
-                                <p>ADD COMPOUNDS FROM VAULT</p>
+                            <div style={{ color: 'var(--text-muted)', textAlign: 'center' }}>
+                                <Flame size={64} style={{ opacity: 0.2, marginBottom: '16px', color: '#000' }} />
+                                <p style={{ letterSpacing: '2px', fontWeight: '800', opacity: 0.4 }}>ADD INGREDIENTS</p>
                             </div>
                         ) : (
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center', maxWidth: '80%', alignContent: 'center' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center', alignContent: 'center', padding: '20px' }}>
                                 {selectedIngredients.map((ing, idx) => (
                                     <motion.div
                                         key={`${ing.id}-${idx}`}
-                                        initial={{ scale: 0, y: 20 }}
+                                        initial={{ scale: 0, y: -50, rotateX: 45 }}
                                         animate={{
                                             scale: 1,
-                                            y: status === 'processing' ? [0, -10, 0] : 0,
-                                            rotate: status === 'processing' ? [0, 5, -5, 0] : 0
+                                            y: status === 'processing' ? [0, -5, 0] : 0,
+                                            rotateX: 0
                                         }}
-                                        transition={{
-                                            type: 'spring',
-                                            duration: 0.5,
-                                            // Staggered float effect during processing
-                                            repeat: status === 'processing' ? Infinity : 0,
-                                            repeatDelay: Math.random()
-                                        }}
-                                        className="glass-panel"
+                                        className="card-3d"
                                         style={{
-                                            padding: '4px 8px',
-                                            borderRadius: '12px',
+                                            padding: '8px 16px',
+                                            borderRadius: '20px',
                                             display: 'flex',
                                             alignItems: 'center',
-                                            gap: '4px',
-                                            fontSize: '0.8rem',
-                                            color: ing.color,
-                                            border: `1px solid ${ing.color}44`,
-                                            background: `rgba(0,0,0,0.6)`
+                                            gap: '8px',
+                                            fontSize: '0.9rem',
+                                            fontWeight: '600',
+                                            color: 'var(--text-primary)',
+                                            background: '#fff',
+                                            boxShadow: '0 4px 10px rgba(0,0,0,0.1), 0 2px 0 rgba(0,0,0,0.05)', /* Floating Token */
+                                            border: 'none',
+                                            transform: 'translateZ(20px)'
                                         }}
                                     >
                                         <span>{ing.icon}</span>
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                            <span>{ing.name}</span>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '2px', fontSize: '0.6rem', marginTop: '2px' }}>
-                                                <input
-                                                    type="number"
-                                                    min="1"
-                                                    max="9999"
-                                                    value={ing.quantity || 10}
-                                                    onChange={(e) => onUpdate(idx, 'quantity', Math.max(1, parseInt(e.target.value) || 0))}
-                                                    disabled={status === 'processing'}
-                                                    style={{
-                                                        width: '32px',
-                                                        background: 'rgba(255,255,255,0.1)',
-                                                        border: 'none',
-                                                        color: 'var(--text-primary)',
-                                                        textAlign: 'center',
-                                                        borderRadius: '2px',
-                                                        fontSize: '0.6rem',
-                                                        padding: '1px'
-                                                    }}
-                                                />
-                                                <span style={{ opacity: 0.5 }}>{ing.unit || 'g'}</span>
-                                            </div>
+                                        <span>{ing.name}</span>
+                                        <div style={{ background: 'rgba(0,0,0,0.05)', padding: '2px 8px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--text-secondary)' }}>
+                                            {ing.quantity}{ing.unit || 'g'}
                                         </div>
                                         <button
                                             onClick={() => onRemove(idx)}
                                             disabled={status === 'processing'}
-                                            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginLeft: '4px' }}
+                                            style={{ background: 'none', border: 'none', color: 'var(--color-alert-red)', cursor: 'pointer', marginLeft: '4px', fontWeight: 'bold' }}
                                         >
                                             ×
                                         </button>
@@ -217,55 +196,52 @@ const MixingVessel = ({ selectedIngredients, onRemove, onUpdate, onProcess, onRe
                 </div>
 
                 {/* Actions */}
-                <div style={{ display: 'flex', gap: 'var(--spacing-md)', marginBottom: 'var(--spacing-md)' }}>
+                <div style={{ display: 'flex', gap: '16px', marginTop: 'auto', marginBottom: '8px' }}>
                     <button
                         onClick={onReset}
-                        className="mono"
                         disabled={status === 'processing'}
                         style={{
-                            flex: 1,
-                            padding: '12px',
-                            background: 'transparent',
-                            border: '1px solid var(--color-alert-red)',
-                            color: 'var(--color-alert-red)',
-                            borderRadius: '4px',
+                            padding: '16px 24px',
+                            background: '#fff',
+                            border: '1px solid var(--border-color)',
+                            color: 'var(--text-secondary)',
+                            borderRadius: '50px',
                             cursor: status === 'processing' ? 'not-allowed' : 'pointer',
-                            opacity: status === 'processing' ? 0.5 : 1,
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '8px'
+                            gap: '8px',
+                            fontWeight: '800',
+                            boxShadow: '0 5px 0 #ddd, 0 10px 15px rgba(0,0,0,0.1)',
+                            transition: 'all 0.1s'
                         }}
+                        onMouseDown={e => e.currentTarget.style.transform = 'translateY(5px) scale(0.98)'}
+                        onMouseUp={e => e.currentTarget.style.transform = 'translateY(0) scale(1)'}
                     >
-                        <RotateCcw size={16} /> RESET
+                        <RotateCcw size={18} /> CLEAR
                     </button>
 
                     <button
                         onClick={onProcess}
-                        className="mono"
-                        disabled={status === 'processing'}
+                        disabled={status === 'processing' || selectedIngredients.length === 0}
+                        className="btn-gamified"
                         style={{
-                            flex: 2,
-                            padding: '12px',
-                            background: 'rgba(57, 255, 20, 0.1)',
-                            border: '1px solid var(--color-neon-green)',
-                            color: 'var(--color-neon-green)',
-                            borderRadius: '4px',
-                            cursor: status === 'processing' ? 'not-allowed' : 'pointer',
-                            opacity: status === 'processing' ? 0.8 : 1,
+                            flex: 1,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            gap: '8px',
-                            boxShadow: status === 'processing' ? 'none' : 'var(--glow-green)'
+                            gap: '12px',
+                            fontSize: '1.2rem',
+                            cursor: (status === 'processing' || selectedIngredients.length === 0) ? 'not-allowed' : 'pointer',
+                            opacity: (status === 'processing' || selectedIngredients.length === 0) ? 0.6 : 1,
+                            filter: (status === 'processing') ? 'grayscale(100%)' : 'none'
                         }}
                     >
-                        <Play size={16} /> {status === 'processing' ? 'PROCESSING...' : 'INITIATE SIMULATION'}
+                        <Flame size={24} fill={status === 'processing' ? 'none' : '#fff'} />
+                        {status === 'processing' ? 'COOKING...' : 'COOK DISH'}
                     </button>
                 </div>
 
-                {/* Log */}
-                <SimulationLog logs={logs} />
+
             </div>
         </div>
     );

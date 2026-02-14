@@ -26,7 +26,7 @@ const InteractionAlert = ({ activeAlerts = [] }) => {
                             display: 'flex',
                             gap: '8px',
                             padding: '8px',
-                            background: 'rgba(255, 255, 255, 0.05)',
+                            background: 'rgba(0, 0, 0, 0.05)',
                             borderLeft: '2px solid var(--color-neon-cyan)',
                             borderRadius: '0 4px 4px 0'
                         }}>

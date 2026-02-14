@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { fetchRecipes } from '../../api/recipeDB';
+import { getTopRecipeMatches } from '../../api/recipeDB';
 import { Loader } from 'lucide-react';
 import RecipeDetailModal from './RecipeDetailModal';
 
-const RecipeInspiration = ({ style, onImport }) => {
+const RecipeInspiration = ({ style, onImport, currentIngredients = [] }) => {
     const [recipes, setRecipes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -12,7 +12,11 @@ const RecipeInspiration = ({ style, onImport }) => {
     useEffect(() => {
         const loadData = async () => {
             setLoading(true);
-            const data = await fetchRecipes(1, 5); // Fetch first 5
+            setError(null);
+
+            // Fetch top matches based on current ingredients
+            const data = await getTopRecipeMatches(currentIngredients);
+
             if (data && data.payload && data.payload.data) {
                 setRecipes(data.payload.data);
             } else {
@@ -22,13 +26,13 @@ const RecipeInspiration = ({ style, onImport }) => {
         };
 
         loadData();
-    }, []);
+    }, [currentIngredients]); // Re-fetch when ingredients change
 
     if (loading) {
         return (
             <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)' }}>
                 <Loader className="spin" size={24} style={{ marginBottom: '8px' }} />
-                <div>Retrieving Database...</div>
+                <div>Analyzing Matches...</div>
             </div>
         );
     }
@@ -44,7 +48,7 @@ const RecipeInspiration = ({ style, onImport }) => {
     return (
         <div style={{ paddingRight: '4px', ...style }}>
             <h3 style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '12px', letterSpacing: '1px' }}>
-                MOLECULAR_INSPIRATION (LIVE)
+                {currentIngredients.length > 0 ? 'TOP_MATCHES' : 'MOLECULAR_INSPIRATION'}
             </h3>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -53,7 +57,7 @@ const RecipeInspiration = ({ style, onImport }) => {
                         key={recipe._id}
                         onClick={() => setSelectedRecipeId(recipe.Recipe_id)}
                         style={{
-                            background: 'rgba(255, 255, 255, 0.03)',
+                            background: 'rgba(0, 0, 0, 0.03)',
                             border: '1px solid var(--border-color)',
                             borderRadius: '4px',
                             padding: '8px',
@@ -61,11 +65,11 @@ const RecipeInspiration = ({ style, onImport }) => {
                             cursor: 'pointer'
                         }}
                         onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
+                            e.currentTarget.style.background = 'rgba(0, 0, 0, 0.08)';
                             e.currentTarget.style.borderColor = 'var(--color-neon-cyan)';
                         }}
                         onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+                            e.currentTarget.style.background = 'rgba(0, 0, 0, 0.03)';
                             e.currentTarget.style.borderColor = 'var(--border-color)';
                         }}
                     >
