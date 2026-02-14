@@ -45,7 +45,12 @@ const RecipeDetailModal = ({ recipeId, onClose, onImport, initialTitle, initialC
     // Helper to get safe values (prefer API details, fallback to initial props)
     const getSafeTitle = () => details?.title || details?.Recipe_title || initialTitle || 'Untitled Recipe';
     const getSafeCategory = () => details?.category || initialCategory || 'Culinary Archive';
-    const getSafeCalories = () => details?.nutrition?.calories || initialCalories || '---';
+    const getSafeCalories = () => {
+        const detailCals = details?.nutrition?.calories;
+        if (detailCals !== undefined && detailCals !== null) return detailCals;
+        if (initialCalories !== undefined && initialCalories !== null && initialCalories !== 0) return initialCalories;
+        return '---';
+    };
 
     // Deterministic gradient for header if no image
     const getHeaderGradient = (title) => {
@@ -137,7 +142,7 @@ const RecipeDetailModal = ({ recipeId, onClose, onImport, initialTitle, initialC
                             <div className="loader-ring"></div>
                         </div>
                         <div style={{ color: 'var(--text-secondary)', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            {initialTitle ? `Reviewing "${initialTitle}"...` : 'Reviewing Recipe...'}
+                            {initialTitle ? `Opening "${initialTitle}"...` : 'Opening Recipe...'}
                         </div>
                     </div>
                 ) : error ? (
@@ -258,7 +263,7 @@ const RecipeDetailModal = ({ recipeId, onClose, onImport, initialTitle, initialC
                                         gap: '8px'
                                     }}>
                                         <div style={{ width: '4px', height: '24px', background: 'var(--color-neon-cyan)', borderRadius: '2px' }} />
-                                        Mise en place
+                                        Ingredients
                                     </h3>
 
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -326,14 +331,20 @@ const RecipeDetailModal = ({ recipeId, onClose, onImport, initialTitle, initialC
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
-                                                gap: '12px'
+                                                gap: '12px',
+                                                background: 'var(--color-neon-cyan)',
+                                                color: '#fff',
+                                                border: 'none',
+                                                borderRadius: '16px',
+                                                fontWeight: '800',
+                                                boxShadow: '0 8px 32px rgba(41, 128, 185, 0.3)'
                                             }}
                                         >
-                                            <Play size={24} fill="currentColor" />
-                                            <span>Start Cooking Procedure</span>
+                                            <Utensils size={24} />
+                                            <span>MOVE TO MIXING TABLE</span>
                                         </button>
-                                        <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                                            Imports ingredients to the mixing vessel
+                                        <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '0.85rem', color: 'var(--text-muted)', letterSpacing: '0.5px' }}>
+                                            Imports selected ingredients to the active kitchen station
                                         </div>
                                     </div>
                                 </div>

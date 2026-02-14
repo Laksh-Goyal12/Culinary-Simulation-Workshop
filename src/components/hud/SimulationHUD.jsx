@@ -41,14 +41,16 @@ const SimulationHUD = ({ selectedIngredients: data, onImport }) => {
         let count = 0;
 
         selectedIngredients.forEach((ing) => {
-            Object.keys(ing.flavorProfile).forEach((key) => {
-                if (totals[key] !== undefined) {
-                    totals[key] += ing.flavorProfile[key];
-                } else {
-                    // Normalizing keys if needed, for MVP we map custom keys to 'savory' or ignore
-                    totals.savory = (totals.savory || 0) + ing.flavorProfile[key];
-                }
-            });
+            if (ing.flavorProfile) {
+                Object.keys(ing.flavorProfile).forEach((key) => {
+                    if (totals[key] !== undefined) {
+                        totals[key] += ing.flavorProfile[key];
+                    } else {
+                        // Normalizing keys if needed, for MVP we map custom keys to 'savory' or ignore
+                        totals.savory = (totals.savory || 0) + ing.flavorProfile[key];
+                    }
+                });
+            }
             count++;
         });
 

@@ -74,7 +74,7 @@ const RecipeInspiration = ({ style, onImport, currentIngredients = [] }) => {
                 alignItems: 'center',
                 gap: '8px'
             }}>
-                {currentIngredients.length > 0 ? 'TOP REGIONAL MATCHES' : 'CULINARY INSPIRATION'}
+                {currentIngredients.length > 0 ? 'SMART MATCHES' : 'CULINARY INSPIRATION'}
                 <div style={{ flex: 1, height: '1px', background: 'rgba(0,0,0,0.05)' }}></div>
             </h3>
 
@@ -86,7 +86,7 @@ const RecipeInspiration = ({ style, onImport, currentIngredients = [] }) => {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
                     {recipes.map((recipe, index) => (
                         <div
-                            key={recipe._id}
+                            key={recipe._id || recipe.Recipe_id}
                             onClick={() => handleMoveToStation(recipe)}
                             className="card-hover"
                             style={{
@@ -115,12 +115,15 @@ const RecipeInspiration = ({ style, onImport, currentIngredients = [] }) => {
                                         'var(--color-gold)'
                             }} />
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', paddingLeft: '8px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', paddingLeft: '8px', maxWidth: '60%' }}>
                                 <div style={{
                                     fontSize: '1rem',
                                     fontWeight: '700',
                                     color: 'var(--text-primary)',
-                                    lineHeight: '1.2'
+                                    lineHeight: '1.2',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap'
                                 }}>
                                     {recipe.Recipe_title}
                                 </div>
@@ -132,7 +135,7 @@ const RecipeInspiration = ({ style, onImport, currentIngredients = [] }) => {
                                     fontWeight: '600',
                                     opacity: 0.7
                                 }}>
-                                    {recipe.Region || 'International'}
+                                    {recipe.Region || recipe.category || 'International'}
                                 </div>
                             </div>
 
@@ -151,7 +154,7 @@ const RecipeInspiration = ({ style, onImport, currentIngredients = [] }) => {
                                     color: 'var(--text-primary)',
                                     fontFamily: 'var(--font-mono)'
                                 }}>
-                                    {parseFloat(recipe['Energy (kcal)'] || recipe.Calories || 0).toFixed(0)} kcal
+                                    {parseFloat(recipe['Energy (kcal)'] || recipe.Calories || recipe.calories || 0).toFixed(0)} kcal
                                 </span>
                                 <span style={{
                                     fontSize: '0.7rem',
@@ -170,14 +173,15 @@ const RecipeInspiration = ({ style, onImport, currentIngredients = [] }) => {
                                         <><Utensils size={10} /> MOVE TO STATION</>
                                     )}
                                 </span>
-                                {index === 0 && !importingId && (
+                                {recipe.matchCount !== undefined && (
                                     <span style={{
                                         fontSize: '0.65rem',
-                                        color: 'var(--color-neon-cyan)',
-                                        fontWeight: 'bold',
-                                        marginTop: '4px'
+                                        color: recipe.matchCount === recipe.matchTotal ? 'var(--color-neon-green)' : 'var(--color-neon-cyan)',
+                                        fontWeight: '800',
+                                        marginTop: '4px',
+                                        letterSpacing: '0.5px'
                                     }}>
-                                        MATCH SCORE: 98%
+                                        MATCH: {recipe.matchCount}/{recipe.matchTotal} INGREDIENTS
                                     </span>
                                 )}
                             </div>

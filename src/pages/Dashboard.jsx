@@ -169,6 +169,39 @@ const Dashboard = ({ simulationHistory, ingredientVaultSize, setCurrentPage, onR
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic', marginTop: '4px' }}>
                             Collect ingredients and master recipes to earn prestige.
                         </div>
+
+                        {/* Mastery Completion Goal for Level 10 */}
+                        <div style={{
+                            marginTop: '20px',
+                            padding: '16px',
+                            background: 'rgba(255, 255, 255, 0.4)',
+                            borderRadius: '16px',
+                            border: '1px solid rgba(255, 255, 255, 0.5)',
+                            backdropFilter: 'blur(8px)'
+                        }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                <span style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <Star size={14} color="#f1c40f" fill="#f1c40f" />
+                                    Culinary Mastery Goal
+                                </span>
+                                <span style={{ fontSize: '0.85rem', fontWeight: '800', color: 'var(--color-neon-cyan)' }}>{stats.recipesMastered.toLocaleString()} / 10,000</span>
+                            </div>
+                            <div style={{ height: '6px', background: 'rgba(0,0,0,0.05)', borderRadius: '3px', position: 'relative', overflow: 'hidden' }}>
+                                <div style={{
+                                    position: 'absolute',
+                                    left: 0,
+                                    top: 0,
+                                    height: '100%',
+                                    width: `${(stats.recipesMastered / 10000) * 100}%`,
+                                    background: 'var(--color-neon-cyan)',
+                                    borderRadius: '3px',
+                                    boxShadow: '0 0 10px rgba(0, 229, 255, 0.3)'
+                                }} />
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
+                                Reach 95% completion (9,500 recipes) to unlock the <strong>Culinary Legend</strong> rank.
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
