@@ -1,0 +1,99 @@
+:root {
+  /* Molecular Gastronomy Palette */
+  --bg-app: #0f1115; /* Deep Charcoal */
+  --bg-panel: #161b22; /* Slightly Lighter for panels */
+  --bg-panel-transparent: rgba(22, 27, 34, 0.85);
+
+  /* Accents */
+  --color-neon-cyan: #00f0ff;
+  --color-neon-green: #39ff14;
+  --color-alert-red: #ff2a2a;
+  --color-molecular-blue: #2a9df4;
+
+  /* Text */
+  --text-primary: #e6e6e6;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  /* Borders & Glows */
+  --border-color: #334155;
+  --glow-cyan: 0 0 10px rgba(0, 240, 255, 0.3);
+  --glow-green: 0 0 10px rgba(57, 255, 20, 0.3);
+
+  /* Typography */
+  --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* Layout */
+  --header-height: 60px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  line-height: 1.5;
+  overflow: hidden; /* App-like feel */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Utilities */
+.neon-text-cyan {
+  color: var(--color-neon-cyan);
+  text-shadow: var(--glow-cyan);
+}
+
+.neon-text-green {
+  color: var(--color-neon-green);
+  text-shadow: var(--glow-green);
+}
+
+.panel {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: var(--spacing-md);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.glass-panel {
+  background-color: var(--bg-panel-transparent);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-app);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
