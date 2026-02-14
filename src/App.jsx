@@ -49,7 +49,7 @@ const App = () => {
   };
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
 
       <div style={{ flex: 1, overflow: 'hidden' }}>

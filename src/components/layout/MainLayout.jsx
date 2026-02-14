@@ -7,9 +7,12 @@ const MainLayout = ({ leftColumn, centerColumn, rightColumn }) => {
 
             <main style={{
                 flex: 1,
-                padding: 'var(--spacing-md) var(--spacing-md) 40px var(--spacing-md)', // Increased to 40px
+                minHeight: 0, // Ensure flex item shrinks
+                padding: 'var(--spacing-md) var(--spacing-md) 60px var(--spacing-md)', // Increased to 60px for definitive visibility
+                overflow: 'hidden', // Restored to prevent expansion
                 display: 'grid',
                 gridTemplateColumns: 'minmax(300px, 3fr) minmax(500px, 6fr) minmax(300px, 3fr)',
+                gridTemplateRows: 'minmax(0, 1fr)', // Force grid to stay within container
                 gap: 'var(--spacing-md)'
             }}>
                 {/* Left Column - Ingredient Vault */}
