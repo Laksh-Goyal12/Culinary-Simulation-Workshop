@@ -1,9 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { X, Check, Flame, List, Play, ChefHat, Clock, Utensils } from 'lucide-react';
 import FlavorRadar from './FlavorRadar';
 import NutrientGauge from './NutrientGauge';
 import InteractionAlert from './InteractionAlert';
 import RecipeInspiration from './RecipeInspiration';
+import { getEnhancedFlavorProfile } from '../../api/flavorDB.js';
 
 const SimulationHUD = ({ selectedIngredients: data, onImport }) => {
     // data can be an array (legacy) or object { ingredients, identifiedDish, recipeDetails }
@@ -31,38 +32,53 @@ const SimulationHUD = ({ selectedIngredients: data, onImport }) => {
         return Math.round(ingredientScore);
     }, [recipeDetails, selectedIngredients]);
 
-    // -- Compute Aggregates --
-    // 1. Flavor Data for Radar
-    const flavorData = useMemo(() => {
-        if (selectedIngredients.length === 0) return [];
+    // -- FlavorDB Enhanced Flavor Profile --
+    const [enhancedFlavor, setEnhancedFlavor] = useState(null);
 
-        // Sum up profiles
-        const totals = { bitter: 0, sweet: 0, sour: 0, salty: 0, spicy: 0, savory: 0 };
-        let count = 0;
-
-        selectedIngredients.forEach((ing) => {
-            if (ing.flavorProfile) {
-                Object.keys(ing.flavorProfile).forEach((key) => {
-                    if (totals[key] !== undefined) {
-                        totals[key] += ing.flavorProfile[key];
-                    } else {
-                        // Normalizing keys if needed, for MVP we map custom keys to 'savory' or ignore
-                        totals.savory = (totals.savory || 0) + ing.flavorProfile[key];
-                    }
-                });
+    useEffect(() => {
+        const fetchFlavor = async () => {
+            if (selectedIngredients.length === 0) {
+                setEnhancedFlavor({ sweet: 0, sour: 0, spicy: 0, bitter: 0, savory: 0 });
+                return;
             }
-            count++;
-        });
 
-        // Average
-        return [
-            { subject: 'Sweet', A: Math.min(100, totals.sweet / count), fullMark: 100 },
-            { subject: 'Sour', A: Math.min(100, totals.sour / count) || 0, fullMark: 100 },
-            { subject: 'Spicy', A: Math.min(100, totals.spicy / count), fullMark: 100 },
-            { subject: 'Bitter', A: Math.min(100, totals.bitter / count), fullMark: 100 },
-            { subject: 'Savory', A: Math.min(100, totals.savory / count), fullMark: 100 },
-        ];
+            try {
+                console.log('[SimulationHUD] Fetching FlavorDB profile...');
+                const profile = await getEnhancedFlavorProfile(selectedIngredients);
+                console.log('[SimulationHUD] FlavorDB profile:', profile);
+                setEnhancedFlavor(profile);
+            } catch (error) {
+                console.error('[SimulationHUD] FlavorDB error, using static fallback:', error);
+                // Fallback to static if FlavorDB fails
+                const staticProfile = { sweet: 0, sour: 0, spicy: 0, bitter: 0, savory: 50 };
+                setEnhancedFlavor(staticProfile);
+            }
+        };
+
+        fetchFlavor();
     }, [selectedIngredients]);
+
+    // -- Compute Aggregates --
+    // 1. Flavor Data for Radar (using FlavorDB)
+    const flavorData = useMemo(() => {
+        if (!enhancedFlavor) {
+            return [
+                { subject: 'Sweet', A: 0, fullMark: 100 },
+                { subject: 'Sour', A: 0, fullMark: 100 },
+                { subject: 'Spicy', A: 0, fullMark: 100 },
+                { subject: 'Bitter', A: 0, fullMark: 100 },
+                { subject: 'Savory', A: 0, fullMark: 100 },
+            ];
+        }
+
+        return [
+            { subject: 'Sweet', A: Math.min(100, enhancedFlavor.sweet), fullMark: 100 },
+            { subject: 'Sour', A: Math.min(100, enhancedFlavor.sour), fullMark: 100 },
+            { subject: 'Spicy', A: Math.min(100, enhancedFlavor.spicy), fullMark: 100 },
+            { subject: 'Bitter', A: Math.min(100, enhancedFlavor.bitter), fullMark: 100 },
+            { subject: 'Savory', A: Math.min(100, enhancedFlavor.savory), fullMark: 100 },
+        ];
+    }, [enhancedFlavor]);
 
     // 2. Nutrition
     const nutrition = useMemo(() => {
