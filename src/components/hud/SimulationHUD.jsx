@@ -70,11 +70,14 @@ const SimulationHUD = ({ selectedIngredients: data, onImport }) => {
             const qty = ing.quantity || 10; // Default 10g if missing
             const ratio = qty / 100; // Assume base data is per 100g
 
+            // Safety: Handle ingredients without nutrition data (API imports)
+            const ingNutrition = ing.nutrition || { calories: 0, protein: 0, fat: 0, carbs: 0 };
+
             return {
-                calories: acc.calories + ((ing.nutrition.calories || 0) * ratio),
-                protein: acc.protein + ((ing.nutrition.protein || 0) * ratio),
-                fat: acc.fat + ((ing.nutrition.fat || 0) * ratio),
-                carbs: acc.carbs + ((ing.nutrition.carbs || 0) * ratio),
+                calories: acc.calories + ((ingNutrition.calories || 0) * ratio),
+                protein: acc.protein + ((ingNutrition.protein || 0) * ratio),
+                fat: acc.fat + ((ingNutrition.fat || 0) * ratio),
+                carbs: acc.carbs + ((ingNutrition.carbs || 0) * ratio),
             };
         }, { calories: 0, protein: 0, fat: 0, carbs: 0 });
     }, [selectedIngredients]);

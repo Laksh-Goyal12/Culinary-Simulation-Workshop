@@ -489,7 +489,7 @@ export const getTopRecipeMatches = async (ingredients) => {
                 const recipeIngredientNames = details.ingredients.map(i => i.name.toLowerCase().trim());
 
                 // Count how many of OUR ingredients are in THIS recipe
-                const matches = vesselNames.filter(name =>
+                const matches = uniqueIngredients.filter(name =>
                     recipeIngredientNames.some(rin => rin.includes(name) || name.includes(rin))
                 );
 
@@ -498,8 +498,8 @@ export const getTopRecipeMatches = async (ingredients) => {
                 return {
                     ...candidate,
                     matchCount,
-                    matchTotal: vesselNames.length,
-                    matchPercentage: Math.round((matchCount / vesselNames.length) * 100),
+                    matchTotal: uniqueIngredients.length,
+                    matchPercentage: Math.round((matchCount / uniqueIngredients.length) * 100),
                     recipeTotal: details.ingredients.length,
                     // Purity: How many of the recipe's ingredients are OURS? 
                     // Higher purity = closer to what the user actually put in.
