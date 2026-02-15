@@ -71,26 +71,40 @@ const SearchDish = ({ onImport, onViewRecipe }) => {
         };
     }, []);
 
+    // Debounced Search Effect
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (searchQuery.trim() && !hasSearched) {
+                // Auto-search after 800ms of inactivity if user hasn't manually searched yet
+                // This makes the UI feel "alive" without burning tokens on every keystroke
+                handleSearch();
+            }
+        }, 800);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchQuery]);
+
     const handleSearch = async () => {
         if (!searchQuery.trim()) return;
+
+        // Prevent duplicate searches for same query if already loading
+        if (loading) return;
 
         setLoading(true);
         setHasSearched(true);
         setCurrentPage(1);
-        setRecipes([]); // Clear previous results immediately
+        setRecipes([]);
 
         try {
             const data = await searchRecipesByTitle(searchQuery, PAGE_SIZE);
 
             if (data && data.payload && data.payload.data) {
-                console.log(`[SearchDish] Initial search got ${data.payload.data.length} results. Validating...`);
+                console.log(`[SearchDish] Search "${searchQuery}" got ${data.payload.data.length} results.`);
 
-                // Filter out broken recipes
+                // Optimized: We TRUST the validRecipes filter to be fast now
                 const validRecipes = await filterValidRecipes(data.payload.data);
                 setRecipes(validRecipes);
 
-                // Show "See More" if we got a full page from API (regardless of how many we filtered out)
-                // This ensures we can still reach the next page
                 const shouldShowMore = data.payload.data.length === PAGE_SIZE;
                 setHasMore(shouldShowMore);
             } else {
@@ -116,7 +130,6 @@ const SearchDish = ({ onImport, onViewRecipe }) => {
             const data = await searchRecipesByTitle(searchQuery, PAGE_SIZE, nextPage);
 
             if (data && data.payload && data.payload.data && data.payload.data.length > 0) {
-                console.log(`[SearchDish] Loaded ${data.payload.data.length} more. Validating...`);
                 const validRecipes = await filterValidRecipes(data.payload.data);
 
                 setRecipes(prev => [...prev, ...validRecipes]);
@@ -448,7 +461,7 @@ const SearchDish = ({ onImport, onViewRecipe }) => {
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
-                                marginTop: '40px',
+                                marginTop: '0',
                                 animation: 'fadeIn 0.8s ease'
                             }}>
                                 <div style={{

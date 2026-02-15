@@ -3,12 +3,12 @@
  */
 
 const CACHE_PREFIX = 'culinary_sim_';
-const DEFAULT_TTL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+const DEFAULT_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days (Optimization)
 
 /**
- * Get cached data if it exists
+ * Get cached data if it exists and is valid
  * @param {string} key - Cache key
- * @returns {any|null} - Cached data or null if not found
+ * @returns {any|null} - Cached data or null if not found/expired
  */
 export const getCachedData = (key) => {
     try {
@@ -17,10 +17,17 @@ export const getCachedData = (key) => {
 
         if (!cached) return null;
 
-        const { data } = JSON.parse(cached);
+        const entry = JSON.parse(cached);
+
+        // Check for expiration
+        if (entry.timestamp && (Date.now() - entry.timestamp > DEFAULT_TTL)) {
+            console.log(`[Cache] Expired: ${key}`);
+            localStorage.removeItem(fullKey);
+            return null;
+        }
 
         console.log(`[Cache] HIT: ${key}`);
-        return data;
+        return entry.data;
     } catch (error) {
         console.warn('[Cache] Read error:', error);
         return null;
@@ -40,11 +47,20 @@ export const setCachedData = (key, data) => {
             timestamp: Date.now()
         };
 
-        localStorage.setItem(fullKey, JSON.stringify(cacheEntry));
+        // Safety: If storage is full, clear old entries
+        try {
+            localStorage.setItem(fullKey, JSON.stringify(cacheEntry));
+        } catch (e) {
+            if (e.name === 'QuotaExceededError') {
+                console.warn('[Cache] Storage full, clearing old entries...');
+                clearAllCache(); // Radical cleanup to save current request
+                localStorage.setItem(fullKey, JSON.stringify(cacheEntry));
+            }
+        }
+
         console.log(`[Cache] SET: ${key}`);
     } catch (error) {
         console.warn('[Cache] Write error:', error);
-        // Don't throw - caching is optional
     }
 };
 

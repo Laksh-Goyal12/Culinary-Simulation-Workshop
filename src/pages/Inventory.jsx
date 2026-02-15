@@ -70,7 +70,7 @@ const Inventory = ({ onSimulationComplete, onViewRecipe }) => {
             addLog('VESSEL_MODIFIED: RE-SIMULATION REQUIRED', 'warning');
         }
 
-        if (selectedIngredients.length >= 8) {
+        if (selectedIngredients.length >= 20) {
             addLog('VESSEL_CAPACITY_REACHED', 'error');
             return;
         }

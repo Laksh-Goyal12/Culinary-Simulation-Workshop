@@ -60,14 +60,26 @@ const MixingVessel = ({ selectedIngredients, onRemove, onUpdate, onProcess, onRe
                         zIndex: 1
                     }}></div>
 
-                    <div style={{ zIndex: 2, textAlign: 'center', width: '80%', height: '80%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                    <div style={{ zIndex: 2, textAlign: 'center', width: '88%', height: '88%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
                         {selectedIngredients.length === 0 ? (
                             <div style={{ color: 'var(--text-muted)', textAlign: 'center' }}>
                                 <Flame size={64} style={{ opacity: 0.2, marginBottom: '16px', color: '#000' }} />
                                 <p style={{ letterSpacing: '2px', fontWeight: '800', opacity: 0.4 }}>ADD INGREDIENTS</p>
                             </div>
                         ) : (
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center', alignContent: 'center', padding: '20px' }}>
+                            <div style={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: '4px',
+                                justifyContent: 'center',
+                                alignContent: 'center',
+                                padding: '4px',
+                                height: '100%',
+                                overflowY: 'scroll', // Force scrollbar to prevent flashing
+                                // scrollbarGutter is redundant if we force scroll, but harmless.
+                            }}
+                                className="thin-scrollbar"
+                            >
                                 {selectedIngredients.map((ing, idx) => (
                                     <motion.div
                                         key={`${ing.id}-${idx}`}
@@ -77,31 +89,47 @@ const MixingVessel = ({ selectedIngredients, onRemove, onUpdate, onProcess, onRe
                                             y: status === 'processing' ? [0, -5, 0] : 0,
                                             rotateX: 0
                                         }}
-                                        className="card-3d"
+                                        className="ingredient-pill"
                                         style={{
-                                            padding: '8px 16px',
-                                            borderRadius: '20px',
+                                            padding: '4px 8px',
+                                            borderRadius: '50px',
                                             display: 'flex',
                                             alignItems: 'center',
-                                            gap: '8px',
-                                            fontSize: '0.9rem',
+                                            gap: '4px',
+                                            fontSize: '0.75rem',
                                             fontWeight: '600',
-                                            color: 'var(--text-primary)',
-                                            background: '#fff',
-                                            boxShadow: '0 4px 10px rgba(0,0,0,0.1), 0 2px 0 rgba(0,0,0,0.05)', /* Floating Token */
-                                            border: 'none',
-                                            transform: 'translateZ(20px)'
+                                            color: '#333',
+                                            background: 'rgba(255, 255, 255, 0.95)',
+                                            boxShadow: '0 2px 5px rgba(0,0,0,0.1), 0 1px 0 rgba(0,0,0,0.05)',
+                                            border: '1px solid rgba(0,0,0,0.05)',
+                                            transform: 'translateZ(10px)',
+                                            whiteSpace: 'nowrap',
+                                            flexShrink: 0 // Prevent shrinking too much
                                         }}
                                     >
-                                        <span>{ing.icon}</span>
+                                        <span style={{ fontSize: '1rem' }}>{ing.icon}</span>
                                         <span>{ing.name}</span>
-                                        <div style={{ background: 'rgba(0,0,0,0.05)', padding: '2px 8px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--text-secondary)' }}>
+                                        <div style={{ background: 'rgba(0,0,0,0.05)', padding: '2px 4px', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 'bold', color: '#666' }}>
                                             {ing.quantity}{ing.unit || 'g'}
                                         </div>
                                         <button
                                             onClick={() => onRemove(idx)}
                                             disabled={status === 'processing'}
-                                            style={{ background: 'none', border: 'none', color: 'var(--color-alert-red)', cursor: 'pointer', marginLeft: '4px', fontWeight: 'bold' }}
+                                            style={{
+                                                background: '#ff6b6b',
+                                                border: 'none',
+                                                color: '#fff',
+                                                cursor: 'pointer',
+                                                marginLeft: '4px',
+                                                borderRadius: '50%',
+                                                width: '14px',
+                                                height: '14px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                fontSize: '10px',
+                                                lineHeight: 1
+                                            }}
                                         >
                                             ×
                                         </button>

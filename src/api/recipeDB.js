@@ -52,10 +52,14 @@ export const searchIngredientsInRecipes = async (query) => {
 
     const performFetch = async (retryCount = 0) => {
         try {
-            console.log(`[API] Searching recipes containing: "${query}" (Attempt ${retryCount + 1})`);
+            // Fix: Trim whitespace and encode to prevent API 500 errors on trailing spaces
+            const cleanQuery = query.trim();
+            if (!cleanQuery) return [];
+
+            console.log(`[API] Searching recipes containing: "${cleanQuery}" (Attempt ${retryCount + 1})`);
 
             // Step 1: Search for recipes
-            const searchUrl = `/recipe2-api/recipebyingredient/by-ingredients-categories-title?includeIngredients=${query}&page=1&limit=5`;
+            const searchUrl = `/recipe2-api/recipebyingredient/by-ingredients-categories-title?includeIngredients=${encodeURIComponent(cleanQuery)}&page=1&limit=5`;
 
             const searchRes = await fetch(searchUrl, {
                 method: 'GET',
@@ -436,12 +440,25 @@ export const getTopRecipeMatches = async (ingredients) => {
             }
 
             // Create comma-separated list of ingredient names for API search
-            const vesselNames = [...new Set(ingredients.map(i => i.name.toLowerCase().trim()))];
-            const namesQuery = vesselNames.slice(0, 5).join(',');
+            // FIX: Reverse the list so the MOST RECENTLY ADDED ingredients are first in the query.
+            // This helps if the API has an internal limit or weighting bias towards the start.
+            const uniqueIngredients = [...new Set(ingredients.map(i => i.name.toLowerCase().trim()))];
+
+            // Filter out common staples from the API QUERY (but keep them for scoring later if needed)
+            // This prevents "Water" and "Salt" from dominating the search results.
+            const IGNORED_IN_SEARCH = ['water', 'salt', 'sea salt', 'sugar', 'ice', 'ice cubes', 'vegetable oil', 'oil', 'pepper', 'black pepper'];
+
+            const searchIngredients = uniqueIngredients
+                .filter(name => !IGNORED_IN_SEARCH.includes(name))
+                .reverse(); // LIFO priority
+
+            // Use the filtered list for the query, but fallback to original if everything was filtered out (e.g. just "Water")
+            const namesQuery = (searchIngredients.length > 0 ? searchIngredients : uniqueIngredients).join(',');
 
             console.log(`[API] Fetching candidates for coverage match: ${namesQuery} (Attempt ${retryCount + 1})`);
 
-            const searchUrl = `/recipe2-api/recipebyingredient/by-ingredients-categories-title?includeIngredients=${encodeURIComponent(namesQuery)}&page=1&limit=8`;
+            // Increase limit to 20 to cast a wider net for specific matches disguised by common ingredients
+            const searchUrl = `/recipe2-api/recipebyingredient/by-ingredients-categories-title?includeIngredients=${encodeURIComponent(namesQuery)}&page=1&limit=20`;
 
             const response = await fetch(searchUrl, {
                 headers: { 'Authorization': `Bearer ${API_KEY}` }
@@ -462,17 +479,21 @@ export const getTopRecipeMatches = async (ingredients) => {
 
             if (candidates.length === 0) return { payload: { data: [] } };
 
-            // Step 2: Fetch details for top 6 candidates to calculate real coverage
+            // Step 2: Fetch details for top 12 candidates (was 6) to calculate real coverage
             // We fetch details because the list endpoint doesn't give us the full ingredient list needed for accurate scoring
-            const detailPromises = candidates.slice(0, 6).map(async (candidate) => {
+            const detailPromises = candidates.slice(0, 12).map(async (candidate) => {
                 const details = await fetchRecipeDetails(candidate.Recipe_id);
                 if (!details || !details.ingredients) return null;
 
-                // Calculate Match Count
+                // Calculate Match Count (Strict Intersection)
                 const recipeIngredientNames = details.ingredients.map(i => i.name.toLowerCase().trim());
-                const matchCount = vesselNames.filter(name =>
+
+                // Count how many of OUR ingredients are in THIS recipe
+                const matches = vesselNames.filter(name =>
                     recipeIngredientNames.some(rin => rin.includes(name) || name.includes(rin))
-                ).length;
+                );
+
+                const matchCount = matches.length;
 
                 return {
                     ...candidate,
@@ -480,19 +501,22 @@ export const getTopRecipeMatches = async (ingredients) => {
                     matchTotal: vesselNames.length,
                     matchPercentage: Math.round((matchCount / vesselNames.length) * 100),
                     recipeTotal: details.ingredients.length,
-                    purity: matchCount / details.ingredients.length, // Higher means fewer extra ingredients
-                    fullDetails: details
+                    // Purity: How many of the recipe's ingredients are OURS? 
+                    // Higher purity = closer to what the user actually put in.
+                    purity: matchCount / details.ingredients.length,
+                    fullDetails: details,
+                    matchedIngredients: matches // Store for UI/Debugging if needed
                 };
             });
 
             const scoredRecipes = (await Promise.all(detailPromises))
                 .filter(r => r !== null)
                 .sort((a, b) => {
-                    // Primary Sort: Ingredient Coverage (Max Match)
+                    // Primary Sort: Direct Match Count (Highest intersection first)
                     if (b.matchCount !== a.matchCount) {
                         return b.matchCount - a.matchCount;
                     }
-                    // Secondary Sort: Simplicity Purity (Tie-breaker)
+                    // Secondary Sort: Purity (Fewer extra ingredients = Better fit)
                     return b.purity - a.purity;
                 });
 
@@ -521,85 +545,28 @@ export const getTopRecipeMatches = async (ingredients) => {
 export const filterValidRecipes = async (recipes) => {
     if (!recipes || recipes.length === 0) return [];
 
-    console.log(`[Validation] Checking ${recipes.length} recipes for validity...`);
+    console.log(`[Validation] checking ${recipes.length} recipes for validity (Optimized)...`);
 
-    const validations = await Promise.all(recipes.map(async (recipe) => {
-        try {
-            const details = await fetchRecipeDetails(recipe.Recipe_id);
+    // In optimized mode, we TRUST the search result metadata initially.
+    // We only filter out obviously broken items (no title).
+    // This saves 10 API calls per search!
 
-            if (!details || !details.ingredients || details.ingredients.length === 0) {
-                return null;
-            }
+    return recipes.filter(recipe => {
+        const title = recipe.Recipe_title || recipe.title || recipe.recipe_title;
+        const hasId = recipe.Recipe_id || recipe.recipe_id;
 
-            const invalidIngredients = details.ingredients.filter(i =>
-                i.name === 'Unknown' || !i.name || i.name.trim() === ''
-            ).length;
-
-            if (invalidIngredients > details.ingredients.length / 2) {
-                return null;
-            }
-
-            // Brute force discovery
-            const fdTitle = (obj) => {
-                if (!obj || typeof obj !== 'object') return null;
-                const keys = Object.keys(obj);
-                const titleKeys = ['recipe_title', 'recipe_name', 'title', 'name', 'label', 'header'];
-                for (const key of keys) {
-                    const lowKey = key.toLowerCase();
-                    if (titleKeys.some(tk => lowKey === tk || (lowKey.includes('recipe') && lowKey.includes('title')))) {
-                        if (typeof obj[key] === 'string' && obj[key].trim() !== '') return obj[key];
-                    }
-                }
-                for (const key of keys) {
-                    if (typeof obj[key] === 'object' && key !== 'ingredients') {
-                        const found = fdTitle(obj[key]);
-                        if (found) return found;
-                    }
-                }
-                return null;
-            };
-
-            const fdCal = (obj) => {
-                if (!obj || typeof obj !== 'object') return null;
-                const keys = Object.keys(obj);
-                const calorieKeys = ['energy', 'calories', 'kcal', 'enerc_kcal', 'energy (kcal)', 'recipe_calories'];
-                for (const key of keys) {
-                    const lowKey = key.toLowerCase();
-                    if (calorieKeys.some(ck => lowKey.includes(ck))) {
-                        const val = obj[key];
-                        if (val && typeof val === 'object' && val.quantity !== undefined) return val.quantity;
-                        if (val !== undefined && val !== null && !isNaN(parseFloat(val))) return parseFloat(val);
-                    }
-                }
-                for (const key of keys) {
-                    if (typeof obj[key] === 'object' && key !== 'ingredients') {
-                        const found = fdCal(obj[key]);
-                        if (found !== null) return found;
-                    }
-                }
-                return null;
-            };
-
-            const searchResultCal = fdCal(recipe);
-            const searchResultTitle = fdTitle(recipe);
-            const detailCal = details.nutrition?.calories;
-            const detailTitle = details.title;
-            const finalTitle = searchResultTitle || detailTitle || recipe.Recipe_title || recipe.title || 'Untitled Dish';
-
-            return {
-                ...recipe,
-                Recipe_title: finalTitle,
-                image_url: details.image || recipe.image_url || recipe.Image_url,
-                calories: (detailCal !== undefined && detailCal !== null) ? detailCal : (searchResultCal !== null ? Math.round(searchResultCal) : null),
-                ingredientCount: details.ingredients ? details.ingredients.length : 0,
-                category: details.category || 'General'
-            };
-        } catch (e) {
-            return null;
-        }
+        // Basic sanity check without fetch
+        return title && hasId && title !== 'Untitled Recipe';
+    }).map(recipe => ({
+        ...recipe,
+        // Ensure consistent keys
+        Recipe_title: recipe.Recipe_title || recipe.title || recipe.recipe_title,
+        Recipe_id: recipe.Recipe_id || recipe.recipe_id,
+        // If calories are missing from search result, we set to null (will show '?' in UI)
+        // rather than burning a token to fetch it immediately.
+        calories: recipe.calories || recipe.Calories || null,
+        category: recipe.Recipe_category || recipe.category || 'General'
     }));
-
-    return validations.filter(r => r !== null);
 };
 
 /**
