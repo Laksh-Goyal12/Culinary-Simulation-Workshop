@@ -1,138 +1,51 @@
 /**
- * FlavorDB Integration for Robust Flavor Profiles
- * Maps ingredients to flavor compounds and calculates enhanced flavor profiles
+ * Smart Flavor Profile System (CORS-Free)
+ * Uses intelligent keyword matching since FlavorDB API is CORS-blocked from client-side
  */
-
-import { getCachedData, setCachedData } from '../utils/cacheUtils.js';
-
-// FlavorDB ingredient name to entity ID mapping (sample - can be expanded)
-const FLAVORDB_ENTITY_MAP = {
-    // Common ingredients
-    'chicken': 200,
-    'beef': 201,
-    'pork': 202,
-    'lamb': 203,
-    'rice': 391,
-    'wheat': 421,
-    'corn': 105,
-    'potato': 378,
-    'tomato': 413,
-    'onion': 343,
-    'garlic': 178,
-    'ginger': 182,
-    'lemon': 266,
-    'lime': 271,
-    'apple': 18,
-    'banana': 35,
-    'strawberry': 403,
-    'orange': 346,
-    'milk': 301,
-    'cheese': 80,
-    'butter': 67,
-    'egg': 147,
-    'coffee': 96,
-    'chocolate': 84,
-    'vanilla': 424,
-    'cinnamon': 90,
-    'pepper': 360,
-    'salt': 395, // Note: Salt might not have flavor compounds
-    'sugar': 405,
-    'honey': 226,
-    'basil': 38,
-    'mint': 304,
-    'thyme': 410,
-    'rosemary': 388,
-    'carrot': 74,
-    'celery': 77,
-    'mushroom': 310,
-    'peanut': 355,
-    'almond': 11,
-    'walnut': 429,
-    'soy sauce': 399,
-    'fish': 165,
-    'shrimp': 398,
-    'salmon': 393,
-    'tuna': 418,
-    'wine': 433,
-    'beer': 44,
-    'tea': 408,
-    'oil': 340,
-    'vinegar': 427,
-    'yogurt': 438
-};
 
 /**
- * Fetch flavor compounds from FlavorDB for a given ingredient
+ * Intelligent flavor profile generator based on ingredient name analysis
+ * This uses culinary keywords to determine dominant tastes
  */
-export const fetchFlavorCompounds = async (ingredientName) => {
-    const normalizedName = ingredientName.toLowerCase().trim();
-    const cacheKey = `flavordb_${normalizedName}`;
+export const getIngredientFlavorProfile = (ingredientName) => {
+    const name = ingredientName.toLowerCase().trim();
 
-    // Check cache first
-    const cached = getCachedData(cacheKey);
-    if (cached) {
-        console.log(`[FlavorDB] Cache HIT: ${normalizedName}`);
-        return cached;
-    }
-
-    try {
-        // Map ingredient name to FlavorDB entity ID
-        const entityId = FLAVORDB_ENTITY_MAP[normalizedName];
-
-        if (!entityId) {
-            console.log(`[FlavorDB] No mapping for: ${normalizedName}`);
-            return null;
+    // Keyword-based flavor mapping (inspired by FlavorDB categorizations)
+    const flavorKeywords = {
+        // SOUR ingredients
+        sour: {
+            keywords: ['lemon', 'lime', 'vinegar', 'citrus', 'orange', 'grapefruit', 'tamarind',
+                'yogurt', 'sour cream', 'buttermilk', 'cranberry', 'pomegranate', 'kiwi',
+                'green apple', 'sauerkraut', 'kimchi', 'pickle'],
+            score: 85
+        },
+        // SWEET ingredients  
+        sweet: {
+            keywords: ['sugar', 'honey', 'maple syrup', 'agave', 'molasses', 'caramel', 'chocolate',
+                'vanilla', 'banana', 'mango', 'strawberry', 'peach', 'pear', 'apple', 'grape',
+                'cherry', 'melon', 'dates', 'raisins', 'fig', 'sweet potato', 'corn', 'carrot'],
+            score: 80
+        },
+        // SPICY/HOT ingredients
+        spicy: {
+            keywords: ['chili', 'pepper', 'cayenne', 'jalapeño', 'habanero', 'tabasco', 'sriracha',
+                'wasabi', 'horseradish', 'ginger', 'garlic', 'onion', 'mustard', 'radish'],
+            score: 90
+        },
+        // BITTER ingredients
+        bitter: {
+            keywords: ['coffee', 'dark chocolate', 'kale', 'arugula', 'endive', 'radicchio',
+                'grapefruit', 'beer', 'tonic', 'cocoa', 'tea', 'turmeric', 'fenugreek'],
+            score: 75
+        },
+        // SAVORY/UMAMI ingredients
+        savory: {
+            keywords: ['salt', 'soy sauce', 'fish sauce', 'miso', 'parmesan', 'cheese', 'mushroom',
+                'tomato', 'beef', 'chicken', 'pork', 'bacon', 'anchovy', 'seaweed', 'broth',
+                'stock', 'meat', 'shrimp', 'crab', 'lobster', 'salmon', 'tuna'],
+            score: 80
         }
-
-        const url = `https://cosylab.iiitd.edu.in/flavordb/entities_json?id=${entityId}`;
-        const response = await fetch(url);
-
-        if (!response.ok) {
-            console.warn(`[FlavorDB] API error for ${ingredientName}: ${response.status}`);
-            return null;
-        }
-
-        const data = await response.json();
-
-        // Extract flavor profiles from molecules
-        const flavorProfiles = [];
-        if (data.molecules && Array.isArray(data.molecules)) {
-            data.molecules.forEach(molecule => {
-                if (molecule.flavor_profile) {
-                    // Split "@" delimited flavor tags
-                    const tags = molecule.flavor_profile.split('@').map(t => t.trim()).filter(t => t);
-                    flavorProfiles.push(...tags);
-                }
-            });
-        }
-
-        const result = {
-            entityId,
-            category: data.category_readable,
-            compoundCount: data.molecules?.length || 0,
-            flavorTags: [...new Set(flavorProfiles)] // Unique tags
-        };
-
-        // Cache for 7 days (flavor data doesn't change)
-        setCachedData(cacheKey, result, 7 * 24 * 60 * 60 * 1000);
-
-        console.log(`[FlavorDB] Fetched ${result.compoundCount} compounds for ${ingredientName}`);
-        return result;
-
-    } catch (error) {
-        console.error(`[FlavorDB] Error fetching ${ingredientName}:`, error);
-        return null;
-    }
-};
-
-/**
- * Map FlavorDB tags to our 5-taste radar chart
- * Returns enhanced flavor profile with weighted scores
- */
-export const mapFlavorTagsToProfile = (flavorTags) => {
-    if (!flavorTags || flavorTags.length === 0) {
-        return { sweet: 0, sour: 0, spicy: 0, bitter: 0, savory: 0 };
-    }
+    };
 
     const profile = {
         sweet: 0,
@@ -142,48 +55,62 @@ export const mapFlavorTagsToProfile = (flavorTags) => {
         savory: 0
     };
 
-    // Keyword mapping from FlavorDB tags to taste categories
-    const TASTE_KEYWORDS = {
-        sweet: ['sweet', 'sugar', 'honey', 'caramel', 'vanilla', 'fruity', 'berry', 'candy', 'syrup'],
-        sour: ['sour', 'acid', 'acidic', 'tart', 'tangy', 'citrus', 'lemon', 'vinegar', 'fermented'],
-        spicy: ['spicy', 'hot', 'pungent', 'pepper', 'chili', 'ginger', 'heat', 'sharp', 'warm'],
-        bitter: ['bitter', 'astringent', 'burnt', 'charred', 'roasted', 'tobacco', 'coffee', 'dark chocolate'],
-        savory: ['savory', 'umami', 'meaty', 'meat', 'beef', 'broth', 'roast', 'chicken', 'fish',
-            'cheese', 'soy', 'mushroom', 'earthy', 'rich', 'nutty', 'toasted']
-    };
-
-    // Count keyword matches
-    const tagLower = flavorTags.map(t => t.toLowerCase());
-
-    for (const [taste, keywords] of Object.entries(TASTE_KEYWORDS)) {
-        let matchCount = 0;
-        keywords.forEach(keyword => {
-            matchCount += tagLower.filter(tag => tag.includes(keyword)).length;
-        });
-        profile[taste] = Math.min(100, matchCount * 10); // Cap at 100
+    // Check each taste category
+    for (const [taste, data] of Object.entries(flavorKeywords)) {
+        for (const keyword of data.keywords) {
+            if (name.includes(keyword)) {
+                profile[taste] = Math.max(profile[taste], data.score);
+                // Partial match bonus (e.g., "lemon juice" matches "lemon")
+                break; // Only count the first match per category
+            }
+        }
     }
 
+    // Special cases and combinations
+    if (name.includes('juice')) {
+        // Juice enhances sour/sweet depending on base
+        if (profile.sour > 0) profile.sour = Math.min(100, profile.sour + 10);
+        if (profile.sweet > 0) profile.sweet = Math.min(100, profile.sweet + 10);
+    }
+
+    if (name.includes('water') || name.includes('ice')) {
+        // Neutral - minimal flavor
+        return { sweet: 0, sour: 0, spicy: 0, bitter: 0, savory: 0 };
+    }
+
+    // If no matches found, return empty profile
     return profile;
 };
 
 /**
  * Get enhanced flavor profile for a list of ingredients
- * Combines static data with FlavorDB chemical analysis
+ * Uses intelligent keyword matching for accurate flavor representation
  */
 export const getEnhancedFlavorProfile = async (ingredients) => {
-    const profiles = await Promise.all(
-        ingredients.map(async (ing) => {
-            // Try FlavorDB first
-            const flavorData = await fetchFlavorCompounds(ing.name);
+    console.log('[FlavorProfile] Analyzing ingredients with smart keyword system...');
 
-            if (flavorData && flavorData.flavorTags.length > 0) {
-                return mapFlavorTagsToProfile(flavorData.flavorTags);
-            }
+    const profiles = ingredients.map((ing) => {
+        // First try the smart keyword analysis
+        const smartProfile = getIngredientFlavorProfile(ing.name);
 
-            // Fallback to static  flavor profile if exists
-            return ing.flavorProfile || { sweet: 0, sour: 0, spicy: 0, bitter: 0, savory: 0 };
-        })
-    );
+        // Check if smart profile found anything
+        const hasProfile = Object.values(smartProfile).some(v => v > 0);
+
+        if (hasProfile) {
+            console.log(`[FlavorProfile] Smart profile for "${ing.name}":`, smartProfile);
+            return smartProfile;
+        }
+
+        // Fallback to ingredient's static flavor profile if exists
+        if (ing.flavorProfile) {
+            console.log(`[FlavorProfile] Using static profile for "${ing.name}"`);
+            return ing.flavorProfile;
+        }
+
+        // Last resort: generic savory
+        console.log(`[FlavorProfile] No profile found for "${ing.name}", using default`);
+        return { sweet: 0, sour: 0, spicy: 0, bitter: 0, savory: 30 };
+    });
 
     // Average all profiles
     const totalProfile = {
@@ -195,20 +122,23 @@ export const getEnhancedFlavorProfile = async (ingredients) => {
     };
 
     profiles.forEach(p => {
-        totalProfile.sweet += p.sweet;
-        totalProfile.sour += p.sour;
-        totalProfile.spicy += p.spicy;
-        totalProfile.bitter += p.bitter;
-        totalProfile.savory += p.savory;
+        totalProfile.sweet += p.sweet || 0;
+        totalProfile.sour += p.sour || 0;
+        totalProfile.spicy += p.spicy || 0;
+        totalProfile.bitter += p.bitter || 0;
+        totalProfile.savory += p.savory || 0;
     });
 
     const count = profiles.length || 1;
 
-    return {
+    const finalProfile = {
         sweet: Math.round(totalProfile.sweet / count),
         sour: Math.round(totalProfile.sour / count),
         spicy: Math.round(totalProfile.spicy / count),
         bitter: Math.round(totalProfile.bitter / count),
         savory: Math.round(totalProfile.savory / count)
     };
+
+    console.log('[FlavorProfile] Final aggregated profile:', finalProfile);
+    return finalProfile;
 };
