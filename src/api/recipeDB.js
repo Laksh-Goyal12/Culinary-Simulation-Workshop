@@ -285,11 +285,28 @@ export const fetchRecipeDetails = async (recipeId) => {
         }
 
         const ingredients = rawIngredients
-            .map(ing => ({
-                name: ing.ingredient_name || ing.Ingredient_name || ing.ingredient || ing.Ingredient || ing.name || ing.food || ing.text || ing.original || 'Unknown',
-                quantity: ing.quantity || ing.Quantity || 0,
-                unit: ing.unit || ing.Unit || ''
-            }))
+            .map(ing => {
+                // Extract nutrition data if available (API provides per-ingredient nutrition)
+                const apiNutrition = ing.nutrition || ing.Nutrition || ing.nutrients || {};
+
+                return {
+                    name: ing.ingredient_name || ing.Ingredient_name || ing.ingredient || ing.Ingredient || ing.name || ing.food || ing.text || ing.original || 'Unknown',
+                    quantity: ing.quantity || ing.Quantity || 0,
+                    unit: ing.unit || ing.Unit || '',
+                    // Extract nutrition from API (per 100g basis typically)
+                    nutrition: {
+                        calories: parseFloat(apiNutrition.calories || apiNutrition.energy || apiNutrition.enerc_kcal || 0),
+                        protein: parseFloat(apiNutrition.protein || apiNutrition.procnt || apiNutrition.PROCNT || 0),
+                        fat: parseFloat(apiNutrition.fat || apiNutrition.totalFat || apiNutrition.FAT || 0),
+                        carbs: parseFloat(apiNutrition.carbs || apiNutrition.carbohydrates || apiNutrition.CHOCDF || 0)
+                    },
+                    // Keep other useful metadata
+                    category: ing.category || 'IMPORTED',
+                    tags: ['API_SOURCED'],
+                    icon: '🥄',
+                    color: '#FF6B35'
+                };
+            })
             .filter(ing => ing.quantity !== 0 && ing.quantity !== '0');
 
         // Normalize nutrition (handle various API locations for calories)
